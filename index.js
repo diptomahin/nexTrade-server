@@ -1,8 +1,8 @@
 const express = require('express');
-const  cors = require('cors');
+const cors = require('cors');
 const { MongoClient, ServerApiVersion } = require('mongodb');
 const app = express();
-require ("dotenv").config();
+require("dotenv").config();
 const port = process.env.PORT || 5000;
 
 //middleware
@@ -26,28 +26,53 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
+
     const nexTrade = client.db('nexTrade');
+
+    // mongodb collections
     const assetsCollection = nexTrade.collection('assets');
+    const usersCollection = nexTrade.collection('all-users');
+
+
+
+    
+    // user related api starts form here
+
+    // post a user in usersCollection
+    app.post('/v1/api/all-users', async (req, res) => {
+      const userInfo = req.body;
+      const existingUser = await usersCollection.findOne({ email: userInfo.email })
+      if (existingUser) {
+        return res.send({ message: 'user already exists', insertedId: null })
+      }
+      const result = await usersCollection.insertOne(userInfo);
+      res.send(result)
+    })
+
+    // get all users from usersCollection
+    app.get('/v1/api/all-users', async (req, res) => {
+      const result = await usersCollection.find().sort({ _id: -1 }).toArray();  // get users in lifo methods
+      res.send(result)
+    })
+
+    // user related api ends here
+
+
+
 
     //Assets
-    app.get('/assets', async (req, res) => {
-    const cursor = assetsCollection.find();
-    const result = await cursor.toArray();
-    res.send(result);
+    app.get('/v1/api/assets', async (req, res) => {
+      const cursor = assetsCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
     })
 
 
-    app.post("/assets", async (req, res) => {
+    app.post("/v1/api/assets", async (req, res) => {
       const assets = req.body;
       const result = await assetsCollection.insertOne(assets)
       res.send(result)
     })
-
-
-
-
-
-
 
 
     // Connect the client to the server	(optional starting in v4.7)
@@ -64,9 +89,9 @@ run().catch(console.dir);
 
 
 app.get('/', (req, res) => {
-    res.send('nexTrade server in running ')
+  res.send('nexTrade server in running ')
 });
 
-app.listen(port,()=>{
-    console.log(`nexTrade server is running on port ${port}`)
+app.listen(port, () => {
+  console.log(`nexTrade server is running on port http://localhost:${port}`)
 })
