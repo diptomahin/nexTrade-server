@@ -37,6 +37,13 @@ async function run() {
     })
 
 
+    app.post("/assets", async (req, res) => {
+      const assets = req.body;
+      const result = await assetsCollection.insertOne(assets)
+      res.send(result)
+    })
+
+
 
 
 
