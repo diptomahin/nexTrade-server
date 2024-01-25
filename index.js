@@ -1,9 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const {
-  MongoClient,
-  ServerApiVersion
-} = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express();
 require("dotenv").config();
 // const bodyParser = require('body-parser');
@@ -88,7 +85,6 @@ async function run() {
       console.log(result);
       res.send(result)
     })
-
     // user related api starts form here
 
     // post a user in usersCollection
@@ -107,30 +103,43 @@ async function run() {
       res.send(result)
     })
 
+    
+
     // get all users from usersCollection
-    app.get('/v1/api/all-users', async (req, res) => {
-      const result = await usersCollection.find().sort({
-        _id: -1
-      }).toArray(); // get users in lifo methods
+    app.get('/v1/api/all-users/:email', async (req, res) => {
+      const userEmail = req.params.email;
+      const query = { email: userEmail }
+      const result = await usersCollection.find(query).sort({ _id: -1 }).toArray();  // get users in lifo methods
       res.send(result)
     })
 
-    // user related api ends here
+    app.put('/v1/api/all-users', async (req, res) => {
+      const asset = req.body;
+      console.log(asset);
 
+      const filter = { email: asset.assetBuyerEmail };
+      const userInfo = await usersCollection.findOne(filter);
 
+      // console.log(userInfo)
 
+      // Update the portfolio field with the new array
+      const updatedPortfolio = [...userInfo.portfolio, asset];
 
-    //Assets
-    app.get('/v1/api/assets', async (req, res) => {
-      const cursor = assetsCollection.find();
-      const result = await cursor.toArray();
+      console.log(updatedPortfolio)
+
+      const updatedDoc = {
+        $set: { portfolio: updatedPortfolio }
+      };
+
+      const result = await usersCollection.updateOne(filter, updatedDoc);
       res.send(result);
-    })
+    });
 
-
-    app.post("/v1/api/assets", async (req, res) => {
-      const assets = req.body;
-      const result = await assetsCollection.insertOne(assets)
+    // get users assets
+    app.get("/v1/api/assets/:email", async (req, res) => {
+      const userEmail = req.params.email;
+      const query = { assetBuyerEmail: userEmail }
+      const result = await assetsCollection.find(query).toArray();
       res.send(result)
     })
 
