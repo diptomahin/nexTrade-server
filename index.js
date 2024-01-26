@@ -1,9 +1,11 @@
 const express = require('express');
 const cors = require('cors');
-const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const {
+  MongoClient,
+  ServerApiVersion,
+} = require('mongodb');
 const app = express();
 require("dotenv").config();
-// const bodyParser = require('body-parser');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 const port = process.env.PORT || 5000;
@@ -65,26 +67,7 @@ async function run() {
       }
     });
 
-    app.post('api/v1/deposit', async (req, res) => {
-      // const email = req.params.email;
-      const depositData = req.body;
-      // const query = {
-      //   email: email
-      // };
-      // const depositInfo = {
-      //   $set: {
-      //     transaction: depositData.paymentIntent,
-      //     date: depositData.date,
-      //     time: depositData.time,
-      //     deposit: depositData.amount,
-      //     email: depositData.user.email,
-      //     name: depositData.user.displayName,
-      //   }
-      // }
-      const result = await walletCollection.insertOne(depositData)
-      console.log(result);
-      res.send(result)
-    })
+
     // user related api starts form here
 
     // post a user in usersCollection
@@ -103,13 +86,25 @@ async function run() {
       res.send(result)
     })
 
-    
 
     // get all users from usersCollection
+    app.get('/v1/api/all-users', async (req, res) => {
+      const userEmail = req.params.email;
+      const query = {
+        email: userEmail
+      }
+      const result = await usersCollection.find(query).toArray()
+      res.send(result)
+    })
+
     app.get('/v1/api/all-users/:email', async (req, res) => {
       const userEmail = req.params.email;
-      const query = { email: userEmail }
-      const result = await usersCollection.find(query).sort({ _id: -1 }).toArray();  // get users in lifo methods
+      const query = {
+        email: userEmail
+      }
+      const result = await usersCollection.find(query).sort({
+        _id: -1
+      }).toArray(); // get users in lifo methods
       res.send(result)
     })
 
@@ -117,28 +112,49 @@ async function run() {
       const asset = req.body;
       console.log(asset);
 
-      const filter = { email: asset.assetBuyerEmail };
+      const filter = {
+        email: asset.assetBuyerEmail
+      };
       const userInfo = await usersCollection.findOne(filter);
-
-      // console.log(userInfo)
 
       // Update the portfolio field with the new array
       const updatedPortfolio = [...userInfo.portfolio, asset];
 
-      console.log(updatedPortfolio)
-
       const updatedDoc = {
-        $set: { portfolio: updatedPortfolio }
+        $set: {
+          portfolio: updatedPortfolio
+        }
       };
 
       const result = await usersCollection.updateOne(filter, updatedDoc);
       res.send(result);
     });
 
+    // put
+    app.put('/v1/api/all-users/deposit/:email', async (req, res) => {
+      const userEmail = req.params.email;
+      const depositData = req.body;
+      const query = {
+        email: userEmail
+      }
+      const userData = await usersCollection.findOne(query)
+
+      const depositInfo = {
+        $set: {
+          balance: userData.balance + depositData.deposit,
+          depositData: depositData
+        }
+      }
+      const result = await usersCollection.updateOne(query, depositInfo);
+      res.send(result)
+    })
+
     // get users assets
     app.get("/v1/api/assets/:email", async (req, res) => {
       const userEmail = req.params.email;
-      const query = { assetBuyerEmail: userEmail }
+      const query = {
+        assetBuyerEmail: userEmail
+      }
       const result = await assetsCollection.find(query).toArray();
       res.send(result)
     })
