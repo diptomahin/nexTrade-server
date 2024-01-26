@@ -142,9 +142,10 @@ async function run() {
       const depositInfo = {
         $set: {
           balance: userData.balance + depositData.deposit,
-          depositWithdrawData: [...userData.depositWithdrawData,
-            depositData
-          ]
+          // depositData: [...userData.depositData,
+          //   depositData
+          // ]
+          depositWithdrawData: userData.hasOwnProperty('depositWithdrawData') ? [...userData.depositWithdrawData, depositData] : [depositData]
         },
       }
       const result = await usersCollection.updateOne(query, depositInfo);
