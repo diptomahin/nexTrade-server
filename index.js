@@ -142,7 +142,7 @@ async function run() {
       const depositInfo = {
         $set: {
           balance: userData.balance + depositData.deposit,
-          depositData: [...userData.depositData,
+          depositWithdrawData: [...userData.depositWithdrawData,
             depositData
           ]
         },
