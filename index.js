@@ -108,9 +108,10 @@ async function run() {
       res.send(result)
     })
 
-    app.put('/v1/api/all-users', async (req, res) => {
+    app.put('/v1/api/all-users/:remainingBalance', async (req, res) => {
       const asset = req.body;
-      console.log(asset);
+      const remainingBalance = req.params.remainingBalance
+      // console.log(remainingBalance);
 
       const filter = {
         email: asset.assetBuyerEmail
@@ -122,7 +123,8 @@ async function run() {
 
       const updatedDoc = {
         $set: {
-          portfolio: updatedPortfolio
+          portfolio: updatedPortfolio,
+          balance: remainingBalance
         }
       };
 
@@ -152,15 +154,6 @@ async function run() {
       res.send(result)
     })
 
-    // get users assets
-    app.get("/v1/api/assets/:email", async (req, res) => {
-      const userEmail = req.params.email;
-      const query = {
-        assetBuyerEmail: userEmail
-      }
-      const result = await assetsCollection.find(query).toArray();
-      res.send(result)
-    })
 
 
     // Connect the client to the server	(optional starting in v4.7)
