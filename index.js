@@ -143,7 +143,7 @@ async function run() {
 
       const depositInfo = {
         $set: {
-          balance: userData.balance + depositData.deposit,
+          balance: parseFloat(userData.balance) + parseFloat(depositData.deposit),
           // depositData: [...userData.depositData,
           //   depositData
           // ]
