@@ -34,6 +34,7 @@ async function run() {
 
     // mongodb collections
     const usersCollection = nexTrade.collection('all-users');
+    const watchlistCollection = nexTrade.collection('watchlist');
 
 
     // stripe //
@@ -153,6 +154,28 @@ async function run() {
       const result = await usersCollection.updateOne(query, depositInfo);
       res.send(result)
     })
+
+    // user related api ends here
+
+
+    // watchlist related api starts from here
+
+    // add an asset to watchist
+    app.post('/v1/api/watchlist', async (req, res) => {
+      const assetInfo = req.body;
+      const result = await watchlistCollection.insertOne(assetInfo);
+      res.send(result)
+    })
+
+    // get watchilst info for individual user
+    app.get('/v1/api/watchlist', async (req, res) => {
+      const email = req.query.email
+      const query = { assetBuyerEmail: email };
+      const result = await watchlistCollection.find(query).sort({ _id: -1 }).toArray()
+      res.send(result)
+    })
+
+
 
 
 
