@@ -33,9 +33,8 @@ async function run() {
     const nexTrade = client.db('nexTrade');
 
     // mongodb collections
-    const assetsCollection = nexTrade.collection('assets');
     const usersCollection = nexTrade.collection('all-users');
-    const walletCollection = nexTrade.collection('wallet');
+    const watchlistCollection = nexTrade.collection('watchlist');
 
 
     // stripe //
@@ -97,6 +96,7 @@ async function run() {
       res.send(result)
     })
 
+    // get individual users info
     app.get('/v1/api/all-users/:email', async (req, res) => {
       const userEmail = req.params.email;
       const query = {
@@ -104,10 +104,11 @@ async function run() {
       }
       const result = await usersCollection.find(query).sort({
         _id: -1
-      }).toArray(); // get users in lifo methods
+      }).toArray(); // get user in lifo methods
       res.send(result)
     })
 
+    // add purchased coin Info
     app.put('/v1/api/all-users/:remainingBalance', async (req, res) => {
       const asset = req.body;
       const remainingBalance = req.params.remainingBalance
@@ -153,6 +154,28 @@ async function run() {
       const result = await usersCollection.updateOne(query, depositInfo);
       res.send(result)
     })
+
+    // user related api ends here
+
+
+    // watchlist related api starts from here
+
+    // add an asset to watchist
+    app.post('/v1/api/watchlist', async (req, res) => {
+      const assetInfo = req.body;
+      const result = await watchlistCollection.insertOne(assetInfo);
+      res.send(result)
+    })
+
+    // get watchilst info for individual user
+    app.get('/v1/api/watchlist', async (req, res) => {
+      const email = req.query.email
+      const query = { assetBuyerEmail: email };
+      const result = await watchlistCollection.find(query).sort({ _id: -1 }).toArray()
+      res.send(result)
+    })
+
+
 
 
 
