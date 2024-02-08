@@ -34,7 +34,8 @@ async function run() {
 
     // mongodb collections
     const usersCollection = nexTrade.collection('all-users');
-    const watchlistCollection = nexTrade.collection('watchlist');
+    const watchListCollection = nexTrade.collection('watchlist');
+    const purchasedCollection = nexTrade.collection('purchasedAssets')
 
 
     // stripe //
@@ -108,30 +109,30 @@ async function run() {
       res.send(result)
     })
 
-    // add purchased coin Info
-    app.put('/v1/api/all-users/:remainingBalance', async (req, res) => {
-      const asset = req.body;
-      const remainingBalance = req.params.remainingBalance
-      // console.log(remainingBalance);
+    // // add purchased coin Info
+    // app.put('/v1/api/all-users/:remainingBalance', async (req, res) => {
+    //   const asset = req.body;
+    //   const remainingBalance = req.params.remainingBalance
+    //   // console.log(remainingBalance);
 
-      const filter = {
-        email: asset.assetBuyerEmail
-      };
-      const userInfo = await usersCollection.findOne(filter);
+    //   const filter = {
+    //     email: asset.assetBuyerEmail
+    //   };
+    //   const userInfo = await usersCollection.findOne(filter);
 
-      // Update the portfolio field with the new array
-      const updatedPortfolio = [...userInfo.portfolio, asset];
+    //   // Update the portfolio field with the new array
+    //   const updatedPortfolio = [...userInfo.portfolio, asset];
 
-      const updatedDoc = {
-        $set: {
-          portfolio: updatedPortfolio,
-          balance: remainingBalance
-        }
-      };
+    //   const updatedDoc = {
+    //     $set: {
+    //       portfolio: updatedPortfolio,
+    //       balance: remainingBalance
+    //     }
+    //   };
 
-      const result = await usersCollection.updateOne(filter, updatedDoc);
-      res.send(result);
-    });
+    //   const result = await usersCollection.updateOne(filter, updatedDoc);
+    //   res.send(result);
+    // });
 
     // put
     app.put('/v1/api/all-users/deposit/:email', async (req, res) => {
@@ -158,12 +159,12 @@ async function run() {
     // user related api ends here
 
 
-    // watchlist related api starts from here
+    // watchList related api starts from here
 
     // add an asset to watchist
     app.post('/v1/api/watchlist', async (req, res) => {
       const assetInfo = req.body;
-      const result = await watchlistCollection.insertOne(assetInfo);
+      const result = await watchListCollection.insertOne(assetInfo);
       res.send(result)
     })
 
@@ -171,7 +172,39 @@ async function run() {
     app.get('/v1/api/watchlist', async (req, res) => {
       const email = req.query.email
       const query = { assetBuyerEmail: email };
-      const result = await watchlistCollection.find(query).sort({ _id: -1 }).toArray()
+      const result = await watchListCollection.find(query).sort({ _id: -1 }).toArray()
+      res.send(result)
+    })
+
+    // watchList related api ends here
+
+    // buy related api starts from here
+
+    app.post('/v1/api/purchasedAssets/:remainingBalance', async (req, res) => {
+      const asset = req.body;
+      console.log(asset)
+      const remainingBalance = req.params.remainingBalance
+      // console.log(remainingBalance);
+
+      const filter = {
+        email: asset.assetBuyerEmail
+      };
+      const updatedDoc = {
+        $set: {
+          balance: remainingBalance
+        }
+      };
+      const result1 = await usersCollection.updateOne(filter, updatedDoc);
+      const result = await purchasedCollection.insertOne(asset)
+      res.send(result);
+    });
+
+    app.get('/v1/api/purchasedAssets', async (req, res) => {
+      const userEmail = req.query.email;
+      const query = {
+        assetBuyerEmail: userEmail
+      }
+      const result = await purchasedCollection.find(query).toArray()
       res.send(result)
     })
 
