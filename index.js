@@ -146,13 +146,29 @@ async function run() {
       const depositInfo = {
         $set: {
           balance: parseFloat(userData.balance) + parseFloat(depositData.deposit),
-          // depositData: [...userData.depositData,
-          //   depositData
-          // ]
           depositWithdrawData: userData.hasOwnProperty('depositWithdrawData') ? [...userData.depositWithdrawData, depositData] : [depositData]
         },
       }
       const result = await usersCollection.updateOne(query, depositInfo);
+      res.send(result)
+    })
+
+    // put
+    app.put('/v1/api/all-users/withdraw/:email', async (req, res) => {
+      const userEmail = req.params.email;
+      const withdrawData = req.body;
+      const query = {
+        email: userEmail
+      }
+      const userData = await usersCollection.findOne(query)
+
+      const withdrawInfo = {
+        $set: {
+          balance: parseFloat(userData.balance) - parseFloat(withdrawData.withdraw),
+          depositWithdrawData: userData.hasOwnProperty('depositWithdrawData') ? [...userData.depositWithdrawData, withdrawData] : [withdrawData]
+        },
+      }
+      const result = await usersCollection.updateOne(query, withdrawInfo);
       res.send(result)
     })
 
