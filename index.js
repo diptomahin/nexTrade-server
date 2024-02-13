@@ -109,30 +109,6 @@ async function run() {
       res.send(result)
     })
 
-    // // add purchased coin Info
-    // app.put('/v1/api/all-users/:remainingBalance', async (req, res) => {
-    //   const asset = req.body;
-    //   const remainingBalance = req.params.remainingBalance
-    //   // console.log(remainingBalance);
-
-    //   const filter = {
-    //     email: asset.assetBuyerEmail
-    //   };
-    //   const userInfo = await usersCollection.findOne(filter);
-
-    //   // Update the portfolio field with the new array
-    //   const updatedPortfolio = [...userInfo.portfolio, asset];
-
-    //   const updatedDoc = {
-    //     $set: {
-    //       portfolio: updatedPortfolio,
-    //       balance: remainingBalance
-    //     }
-    //   };
-
-    //   const result = await usersCollection.updateOne(filter, updatedDoc);
-    //   res.send(result);
-    // });
 
     // put
     app.put('/v1/api/all-users/deposit/:email', async (req, res) => {
@@ -187,7 +163,7 @@ async function run() {
     // get watchilst info for individual user
     app.get('/v1/api/watchlist', async (req, res) => {
       const email = req.query.email
-      const query = { assetBuyerEmail: email };
+      const query = { email: email };
       const result = await watchListCollection.find(query).sort({ _id: -1 }).toArray()
       res.send(result)
     })
