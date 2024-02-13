@@ -38,6 +38,7 @@ async function run() {
     const purchasedCollection = nexTrade.collection('purchasedAssets');
     const allCoinCollection = nexTrade.collection('allCoins');
     const depositWithdrawCollection = nexTrade.collection('depositWithdraw');
+    const articleCollection = nexTrade.collection('articles');
 
 
     // stripe //
@@ -347,9 +348,23 @@ async function run() {
     })
 
 
+    // Ariful's API's
+
+      // article API's
+      app.post('/v1/api/articles', async (req, res) => {
+        const articleInfo = req.body;
+        const result = await articleCollection.insertOne(articleInfo);
+        res.send(result)
+      })
+  
+      // Read articles API's
+      app.get('/v1/api/articles', async (req, res) => {
+        const result = await articleCollection.find().toArray()
+        res.send(result)
+      })
 
 
-
+      
     // Connect the client to the server	(optional starting in v4.7)
     // await client.connect();
     // Send a ping to confirm a successful connection
