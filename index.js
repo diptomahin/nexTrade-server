@@ -218,6 +218,7 @@ async function run() {
     });
 
 
+    //  post withdraw data
     app.post('/v1/api/withdraw/:email', async (req, res) => {
       try {
         const userEmail = req.params.email;
@@ -235,8 +236,6 @@ async function run() {
         }
 
         const newBalance = parseFloat(userData.balance) - parseFloat(withdrawData.amount);
-
-        console.log(newBalance);
 
         if (newBalance < 0) {
           // If withdrawal amount exceeds balance, return an error response
