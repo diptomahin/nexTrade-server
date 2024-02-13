@@ -3,6 +3,7 @@ const cors = require('cors');
 const {
   MongoClient,
   ServerApiVersion,
+  ObjectId,
 } = require('mongodb');
 const app = express();
 require("dotenv").config();
@@ -315,6 +316,24 @@ async function run() {
       res.send(result)
     })
 
+
+    // --------Julfiker Ali-------- //
+    // Delete asset from watchList
+    app.delete('/v1/api/watchlist/:id', async (req, res) => {
+      const assetId = req.params.id;
+      try {
+        const result = await watchListCollection.deleteOne({ _id: ObjectId(assetId) });
+        if (result.deletedCount === 1) {
+          res.status(200).json({ message: 'Asset deleted successfully' });
+        } else {
+          res.status(404).json({ message: 'Asset not found' });
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        res.status(500).json({ error: "Internal server error" });
+      }
+    });
+
     // watchList related api ends here
 
     // buy related api starts from here
@@ -350,21 +369,21 @@ async function run() {
 
     // Ariful's API's
 
-      // article API's
-      app.post('/v1/api/articles', async (req, res) => {
-        const articleInfo = req.body;
-        const result = await articleCollection.insertOne(articleInfo);
-        res.send(result)
-      })
-  
-      // Read articles API's
-      app.get('/v1/api/articles', async (req, res) => {
-        const result = await articleCollection.find().toArray()
-        res.send(result)
-      })
+    // article API's
+    app.post('/v1/api/articles', async (req, res) => {
+      const articleInfo = req.body;
+      const result = await articleCollection.insertOne(articleInfo);
+      res.send(result)
+    })
+
+    // Read articles API's
+    app.get('/v1/api/articles', async (req, res) => {
+      const result = await articleCollection.find().toArray()
+      res.send(result)
+    })
 
 
-      
+
     // Connect the client to the server	(optional starting in v4.7)
     // await client.connect();
     // Send a ping to confirm a successful connection
