@@ -37,6 +37,7 @@ async function run() {
     const watchListCollection = nexTrade.collection('watchlist');
     const purchasedCollection = nexTrade.collection('purchasedAssets');
     const allCoinCollection = nexTrade.collection('allCoins');
+    const depositWithdrawCollection = nexTrade.collection('depositWithdraw');
 
 
     // stripe //
@@ -111,48 +112,171 @@ async function run() {
     })
 
 
-    // put
-    app.put('/v1/api/all-users/deposit/:email', async (req, res) => {
+
+    /// ======> Md. Nuruzzaman <====== ///
+
+    // get all deposit and withdraw data
+    app.get('/v1/api/deposit-withdraw/:email', async (req, res) => {
       const userEmail = req.params.email;
-      const depositData = req.body;
       const query = {
         email: userEmail
       }
-      const userData = await usersCollection.findOne(query)
 
-      const depositInfo = {
-        $set: {
-          balance: parseFloat(userData.balance) + parseFloat(depositData.deposit),
-          depositWithdrawData: userData.hasOwnProperty('depositWithdrawData') ? [...userData.depositWithdrawData, depositData] : [depositData]
-        },
-      }
-      const result = await usersCollection.updateOne(query, depositInfo);
+      const result = await depositWithdrawCollection.find(query).toArray()
       res.send(result)
+
     })
 
-    // put
-    app.put('/v1/api/all-users/withdraw/:email', async (req, res) => {
-      const userEmail = req.params.email;
-      const withdrawData = req.body;
+    // get specific searched deposit and withdraw data
+    app.get('/v1/api/deposit-withdraw/specific/:email', async (req, res) => {
+      const email = req.params.email;
+      const filter = req.query;
+
       const query = {
-        email: userEmail
-      }
-      const userData = await usersCollection.findOne(query)
+        email: email
+      };
 
-      const withdrawInfo = {
-        $set: {
-          balance: parseFloat(userData.balance) - parseFloat(withdrawData.withdraw),
-          depositWithdrawData: userData.hasOwnProperty('depositWithdrawData') ? [...userData.depositWithdrawData, withdrawData] : [withdrawData]
-        },
+      if (filter.search && filter.search !== '') {
+        if (!isNaN(filter.search)) {
+          // If search parameter is a number
+          const searchValue = parseFloat(filter.search);
+          query.$or = [{
+            email: email,
+            amount: searchValue
+          }, {
+            email: email,
+            'date.day': searchValue
+          }, {
+            email: email,
+            'date.month': searchValue
+          }, {
+            email: email,
+            'date.year': searchValue
+          }];
+        } else {
+          // If search parameter is not a number, treat it as a string
+          const searchRegex = {
+            $regex: filter.search,
+            $options: 'i',
+          };
+
+          query.$or = [{
+            email: email,
+            currency: searchRegex
+          }, {
+            email: email,
+            action: searchRegex
+          }];
+        }
       }
-      const result = await usersCollection.updateOne(query, withdrawInfo);
-      res.send(result)
-    })
+
+      const result = await depositWithdrawCollection.find(query).toArray();
+      res.send(result);
+    });
+
+
+    // post deposit data
+    app.post('/v1/api/deposit/:email', async (req, res) => {
+      try {
+        const userEmail = req.params.email;
+        const depositData = req.body;
+        const query = {
+          email: userEmail
+        };
+        const userData = await usersCollection.findOne(query);
+
+        if (!userData) {
+          // If user data is not found, return an error response
+          return res.status(404).json({
+            error: "User not found"
+          });
+        }
+
+        const depositInfo = {
+          $set: {
+            balance: parseFloat(userData.balance) + parseFloat(depositData.amount)
+          },
+        };
+        const balanceResult = await usersCollection.updateOne(query, depositInfo);
+
+        if (balanceResult.modifiedCount > 0) {
+          const result = await depositWithdrawCollection.insertOne(depositData);
+          return res.send(result);
+        } else {
+          // If balance is not updated, return an error response
+          return res.status(500).json({
+            error: "Failed to update balance"
+          });
+        }
+      } catch (error) {
+        // If an unexpected error occurs, return a general error response
+        console.error("Error:", error);
+        return res.status(500).json({
+          error: "Internal server error"
+        });
+      }
+    });
+
+
+    //  post withdraw data
+    app.post('/v1/api/withdraw/:email', async (req, res) => {
+      try {
+        const userEmail = req.params.email;
+        const withdrawData = req.body;
+        const query = {
+          email: userEmail
+        };
+        const userData = await usersCollection.findOne(query);
+
+        if (!userData) {
+          // If user data is not found, return an error response
+          return res.status(404).json({
+            error: "User not found"
+          });
+        }
+
+        const newBalance = parseFloat(userData.balance) - parseFloat(withdrawData.amount);
+
+        if (newBalance < 0) {
+          // If withdrawal amount exceeds balance, return an error response
+          return res.status(400).json({
+            error: "Insufficient balance"
+          });
+        }
+
+        const withdrawInfo = {
+          $set: {
+            balance: newBalance
+          }
+        };
+        const balanceResult = await usersCollection.updateOne(query, withdrawInfo);
+
+        if (balanceResult.modifiedCount > 0) {
+          const result = await depositWithdrawCollection.insertOne(withdrawData);
+          res.send(result);
+          return;
+        } else {
+          // If balance is not updated, return an error response
+          return res.status(500).json({
+            error: "Failed to update balance"
+          });
+        }
+      } catch (error) {
+        // If an unexpected error occurs, return a general error response
+        console.error("Error:", error);
+        res.status(500).json({
+          error: "Internal server error"
+        });
+      }
+    });
+
+
+
 
     // user related api ends here
 
-
     // add coin related api
+
     app.post('/v1/api/allCoins', async (req, res) => {
       const assetInfo = req.body;
       const result = await allCoinCollection.insertOne(assetInfo);
@@ -161,7 +285,9 @@ async function run() {
 
     // get coin
     app.get('/v1/api/allCoins', async (req, res) => {
-      const result = await allCoinCollection.find().sort({ _id: -1 }).toArray()
+      const result = await allCoinCollection.find().sort({
+        _id: -1
+      }).toArray()
       res.send(result)
     })
 
@@ -179,8 +305,12 @@ async function run() {
     // get watchilst info for individual user
     app.get('/v1/api/watchlist', async (req, res) => {
       const email = req.query.email
-      const query = { email: email };
-      const result = await watchListCollection.find(query).sort({ _id: -1 }).toArray()
+      const query = {
+        email: email
+      };
+      const result = await watchListCollection.find(query).sort({
+        _id: -1
+      }).toArray()
       res.send(result)
     })
 
