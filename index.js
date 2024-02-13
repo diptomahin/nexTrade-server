@@ -37,6 +37,7 @@ async function run() {
     const watchListCollection = nexTrade.collection('watchlist');
     const purchasedCollection = nexTrade.collection('purchasedAssets');
     const allCoinCollection = nexTrade.collection('allCoins');
+    const depositWithdrawCollection = nexTrade.collection('depositWithdraw');
 
 
     // stripe //
@@ -111,8 +112,121 @@ async function run() {
     })
 
 
-    // put
-    app.put('/v1/api/all-users/deposit/:email', async (req, res) => {
+
+    /// ======> Md. Nuruzzaman <====== ///
+
+
+    // app.put('/v1/api/all-users/deposit/:email', async (req, res) => {
+    //   const userEmail = req.params.email;
+    //   const depositData = req.body;
+    //   const query = {
+    //     email: userEmail
+    //   }
+    //   const userData = await usersCollection.findOne(query)
+
+    //   const depositInfo = {
+    //     $set: {
+    //       balance: parseFloat(userData.balance) + parseFloat(depositData.deposit),
+    //       depositWithdrawData: userData.hasOwnProperty('depositWithdrawData') ? [...userData.depositWithdrawData, depositData] : [depositData]
+    //     },
+    //   }
+    //   const result = await usersCollection.updateOne(query, depositInfo);
+    //   res.send(result)
+    // })
+
+    // app.put('/v1/api/all-users/withdraw/:email', async (req, res) => {
+    //   const userEmail = req.params.email;
+    //   const withdrawData = req.body;
+    //   const query = {
+    //     email: userEmail
+    //   }
+    //   const userData = await usersCollection.findOne(query)
+
+    //   const withdrawInfo = {
+    //     $set: {
+    //       balance: parseFloat(userData.balance) - parseFloat(withdrawData.withdraw),
+    //       depositWithdrawData: userData.hasOwnProperty('depositWithdrawData') ? [...userData.depositWithdrawData, withdrawData] : [withdrawData]
+    //     },
+    //   }
+    //   const result = await usersCollection.updateOne(query, withdrawInfo);
+    //   res.send(result)
+    // })
+
+
+    // get all deposit and withdraw data
+    app.get('/v1/api/deposit-withdraw/:email', async (req, res) => {
+      const userEmail = req.params.email;
+      const query = {
+        email: userEmail
+      }
+
+      const result = await depositWithdrawCollection.find(query).toArray()
+      res.send(result)
+
+    })
+
+    // get searched deposit withdraw data
+    app.get('/v1/api/:email', async (req, res) => {
+      const email = req.params.email;
+      const filter = req.query;
+      const query = {
+        email: email,
+      };
+
+      console.log(filter);
+
+      if (filter.search && filter.search !== '') {
+        const searchRegex = {
+          $regex: filter.search,
+          $options: 'i',
+        };
+
+        query.$or = [{
+            "depositWithdrawData": {
+              $elemMatch: {
+                "date": searchRegex
+              }
+            }
+          },
+          {
+            "depositWithdrawData": {
+              $elemMatch: {
+                "deposit": searchRegex
+              }
+            }
+          },
+          {
+            "depositWithdrawData": {
+              $elemMatch: {
+                "withdraw": searchRegex
+              }
+            }
+          },
+          {
+            "depositWithdrawData": {
+              $elemMatch: {
+                "email": searchRegex
+              }
+            }
+          },
+          {
+            "depositWithdrawData": {
+              $elemMatch: {
+                "name": searchRegex
+              }
+            }
+          }
+        ];
+      }
+
+
+      const result = await usersCollection.find(query).toArray();
+      console.log(result);
+      // res.send(result);
+    });
+
+    // post deposit data
+    app.post('/v1/api/deposit/:email', async (req, res) => {
       const userEmail = req.params.email;
       const depositData = req.body;
       const query = {
@@ -123,15 +237,21 @@ async function run() {
       const depositInfo = {
         $set: {
           balance: parseFloat(userData.balance) + parseFloat(depositData.deposit),
-          depositWithdrawData: userData.hasOwnProperty('depositWithdrawData') ? [...userData.depositWithdrawData, depositData] : [depositData]
         },
       }
-      const result = await usersCollection.updateOne(query, depositInfo);
-      res.send(result)
+      const balanceResult = await usersCollection.updateOne(query, depositInfo)
+
+      if (balanceResult.modifiedCount > 0) {
+        const result = await depositWithdrawCollection.insertOne(depositData)
+        res.send(result)
+        return
+      }
+
     })
 
-    // put
-    app.put('/v1/api/all-users/withdraw/:email', async (req, res) => {
+
+    // post withdraw data
+    app.post('/v1/api/withdraw/:email', async (req, res) => {
       const userEmail = req.params.email;
       const withdrawData = req.body;
       const query = {
@@ -141,12 +261,16 @@ async function run() {
 
       const withdrawInfo = {
         $set: {
-          balance: parseFloat(userData.balance) - parseFloat(withdrawData.withdraw),
-          depositWithdrawData: userData.hasOwnProperty('depositWithdrawData') ? [...userData.depositWithdrawData, withdrawData] : [withdrawData]
-        },
+          balance: parseFloat(userData.balance) - parseFloat(withdrawData.withdraw)
+        }
       }
-      const result = await usersCollection.updateOne(query, withdrawInfo);
-      res.send(result)
+      const balanceResult = await usersCollection.updateOne(query, withdrawInfo)
+
+      if (balanceResult.modifiedCount > 0) {
+        const result = await depositWithdrawCollection.insertOne(withdrawData)
+        res.send(result)
+        return
+      }
     })
 
     // user related api ends here
@@ -161,7 +285,9 @@ async function run() {
 
     // get coin
     app.get('/v1/api/allCoins', async (req, res) => {
-      const result = await allCoinCollection.find().sort({ _id: -1 }).toArray()
+      const result = await allCoinCollection.find().sort({
+        _id: -1
+      }).toArray()
       res.send(result)
     })
 
@@ -179,8 +305,12 @@ async function run() {
     // get watchilst info for individual user
     app.get('/v1/api/watchlist', async (req, res) => {
       const email = req.query.email
-      const query = { email: email };
-      const result = await watchListCollection.find(query).sort({ _id: -1 }).toArray()
+      const query = {
+        email: email
+      };
+      const result = await watchListCollection.find(query).sort({
+        _id: -1
+      }).toArray()
       res.send(result)
     })
 
