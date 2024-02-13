@@ -115,44 +115,6 @@ async function run() {
 
     /// ======> Md. Nuruzzaman <====== ///
 
-
-    // app.put('/v1/api/all-users/deposit/:email', async (req, res) => {
-    //   const userEmail = req.params.email;
-    //   const depositData = req.body;
-    //   const query = {
-    //     email: userEmail
-    //   }
-    //   const userData = await usersCollection.findOne(query)
-
-    //   const depositInfo = {
-    //     $set: {
-    //       balance: parseFloat(userData.balance) + parseFloat(depositData.deposit),
-    //       depositWithdrawData: userData.hasOwnProperty('depositWithdrawData') ? [...userData.depositWithdrawData, depositData] : [depositData]
-    //     },
-    //   }
-    //   const result = await usersCollection.updateOne(query, depositInfo);
-    //   res.send(result)
-    // })
-
-    // app.put('/v1/api/all-users/withdraw/:email', async (req, res) => {
-    //   const userEmail = req.params.email;
-    //   const withdrawData = req.body;
-    //   const query = {
-    //     email: userEmail
-    //   }
-    //   const userData = await usersCollection.findOne(query)
-
-    //   const withdrawInfo = {
-    //     $set: {
-    //       balance: parseFloat(userData.balance) - parseFloat(withdrawData.withdraw),
-    //       depositWithdrawData: userData.hasOwnProperty('depositWithdrawData') ? [...userData.depositWithdrawData, withdrawData] : [withdrawData]
-    //     },
-    //   }
-    //   const result = await usersCollection.updateOne(query, withdrawInfo);
-    //   res.send(result)
-    // })
-
-
     // get all deposit and withdraw data
     app.get('/v1/api/deposit-withdraw/:email', async (req, res) => {
       const userEmail = req.params.email;
@@ -165,118 +127,157 @@ async function run() {
 
     })
 
-    // get searched deposit withdraw data
-    app.get('/v1/api/:email', async (req, res) => {
+    // get specific searched deposit and withdraw data
+    app.get('/v1/api/deposit-withdraw/specific/:email', async (req, res) => {
       const email = req.params.email;
       const filter = req.query;
+
       const query = {
-        email: email,
+        email: email
       };
 
-      console.log(filter);
-
       if (filter.search && filter.search !== '') {
-        const searchRegex = {
-          $regex: filter.search,
-          $options: 'i',
-        };
+        if (!isNaN(filter.search)) {
+          // If search parameter is a number
+          const searchValue = parseFloat(filter.search);
+          query.$or = [{
+            email: email,
+            amount: searchValue
+          }, {
+            email: email,
+            'date.day': searchValue
+          }, {
+            email: email,
+            'date.month': searchValue
+          }, {
+            email: email,
+            'date.year': searchValue
+          }];
+        } else {
+          // If search parameter is not a number, treat it as a string
+          const searchRegex = {
+            $regex: filter.search,
+            $options: 'i',
+          };
 
-        query.$or = [{
-            "depositWithdrawData": {
-              $elemMatch: {
-                "date": searchRegex
-              }
-            }
-          },
-          {
-            "depositWithdrawData": {
-              $elemMatch: {
-                "deposit": searchRegex
-              }
-            }
-          },
-          {
-            "depositWithdrawData": {
-              $elemMatch: {
-                "withdraw": searchRegex
-              }
-            }
-          },
-          {
-            "depositWithdrawData": {
-              $elemMatch: {
-                "email": searchRegex
-              }
-            }
-          },
-          {
-            "depositWithdrawData": {
-              $elemMatch: {
-                "name": searchRegex
-              }
-            }
-          }
-        ];
+          query.$or = [{
+            email: email,
+            currency: searchRegex
+          }, {
+            email: email,
+            action: searchRegex
+          }];
+        }
       }
 
-
-      const result = await usersCollection.find(query).toArray();
-      console.log(result);
-      // res.send(result);
+      const result = await depositWithdrawCollection.find(query).toArray();
+      res.send(result);
     });
+
 
     // post deposit data
     app.post('/v1/api/deposit/:email', async (req, res) => {
-      const userEmail = req.params.email;
-      const depositData = req.body;
-      const query = {
-        email: userEmail
-      }
-      const userData = await usersCollection.findOne(query)
+      try {
+        const userEmail = req.params.email;
+        const depositData = req.body;
+        const query = {
+          email: userEmail
+        };
+        const userData = await usersCollection.findOne(query);
 
-      const depositInfo = {
-        $set: {
-          balance: parseFloat(userData.balance) + parseFloat(depositData.deposit),
-        },
-      }
-      const balanceResult = await usersCollection.updateOne(query, depositInfo)
-
-      if (balanceResult.modifiedCount > 0) {
-        const result = await depositWithdrawCollection.insertOne(depositData)
-        res.send(result)
-        return
-      }
-
-    })
-
-
-    // post withdraw data
-    app.post('/v1/api/withdraw/:email', async (req, res) => {
-      const userEmail = req.params.email;
-      const withdrawData = req.body;
-      const query = {
-        email: userEmail
-      }
-      const userData = await usersCollection.findOne(query)
-
-      const withdrawInfo = {
-        $set: {
-          balance: parseFloat(userData.balance) - parseFloat(withdrawData.withdraw)
+        if (!userData) {
+          // If user data is not found, return an error response
+          return res.status(404).json({
+            error: "User not found"
+          });
         }
-      }
-      const balanceResult = await usersCollection.updateOne(query, withdrawInfo)
 
-      if (balanceResult.modifiedCount > 0) {
-        const result = await depositWithdrawCollection.insertOne(withdrawData)
-        res.send(result)
-        return
+        const depositInfo = {
+          $set: {
+            balance: parseFloat(userData.balance) + parseFloat(depositData.amount)
+          },
+        };
+        const balanceResult = await usersCollection.updateOne(query, depositInfo);
+
+        if (balanceResult.modifiedCount > 0) {
+          const result = await depositWithdrawCollection.insertOne(depositData);
+          return res.send(result);
+        } else {
+          // If balance is not updated, return an error response
+          return res.status(500).json({
+            error: "Failed to update balance"
+          });
+        }
+      } catch (error) {
+        // If an unexpected error occurs, return a general error response
+        console.error("Error:", error);
+        return res.status(500).json({
+          error: "Internal server error"
+        });
       }
-    })
+    });
+
+
+    app.post('/v1/api/withdraw/:email', async (req, res) => {
+      try {
+        const userEmail = req.params.email;
+        const withdrawData = req.body;
+        const query = {
+          email: userEmail
+        };
+        const userData = await usersCollection.findOne(query);
+
+        if (!userData) {
+          // If user data is not found, return an error response
+          return res.status(404).json({
+            error: "User not found"
+          });
+        }
+
+        const newBalance = parseFloat(userData.balance) - parseFloat(withdrawData.amount);
+
+        console.log(newBalance);
+
+        if (newBalance < 0) {
+          // If withdrawal amount exceeds balance, return an error response
+          return res.status(400).json({
+            error: "Insufficient balance"
+          });
+        }
+
+        const withdrawInfo = {
+          $set: {
+            balance: newBalance
+          }
+        };
+        const balanceResult = await usersCollection.updateOne(query, withdrawInfo);
+
+        if (balanceResult.modifiedCount > 0) {
+          const result = await depositWithdrawCollection.insertOne(withdrawData);
+          res.send(result);
+          return;
+        } else {
+          // If balance is not updated, return an error response
+          return res.status(500).json({
+            error: "Failed to update balance"
+          });
+        }
+      } catch (error) {
+        // If an unexpected error occurs, return a general error response
+        console.error("Error:", error);
+        res.status(500).json({
+          error: "Internal server error"
+        });
+      }
+    });
+
+
+
 
     // user related api ends here
 
-
     // add coin related api
+
     app.post('/v1/api/allCoins', async (req, res) => {
       const assetInfo = req.body;
       const result = await allCoinCollection.insertOne(assetInfo);
