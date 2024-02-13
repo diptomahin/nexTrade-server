@@ -35,7 +35,8 @@ async function run() {
     // mongodb collections
     const usersCollection = nexTrade.collection('all-users');
     const watchListCollection = nexTrade.collection('watchlist');
-    const purchasedCollection = nexTrade.collection('purchasedAssets')
+    const purchasedCollection = nexTrade.collection('purchasedAssets');
+    const allCoinCollection = nexTrade.collection('allCoins');
 
 
     // stripe //
@@ -149,6 +150,21 @@ async function run() {
     })
 
     // user related api ends here
+
+
+    // add coin related api
+    app.post('/v1/api/allCoins', async (req, res) => {
+      const assetInfo = req.body;
+      const result = await allCoinCollection.insertOne(assetInfo);
+      res.send(result)
+    })
+
+    // get coin
+    app.get('/v1/api/allCoins', async (req, res) => {
+      const result = await allCoinCollection.find().sort({ _id: -1 }).toArray()
+      res.send(result)
+    })
+
 
 
     // watchList related api starts from here
