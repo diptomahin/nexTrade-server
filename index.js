@@ -277,8 +277,9 @@ async function run() {
 
     // user related api ends here
 
-    // add coin related api
+    // manage coin related api
 
+    // add coin
     app.post('/v1/api/allCoins', async (req, res) => {
       const assetInfo = req.body;
       const result = await allCoinCollection.insertOne(assetInfo);
@@ -298,6 +299,18 @@ async function run() {
       const result = await allCoinCollection.deleteOne(query);
       res.send(result);
     });
+
+    // update coin
+    app.put('/v1/api/allCoins/:id', async (req, res) => {
+      const assetId = req.params.id;
+      const updatedCoin = req.body
+      const filter = { _id: new ObjectId(assetId) };
+      const updatedDoc = {
+        $set: updatedCoin
+      }
+      const result = await allCoinCollection.updateOne(filter, updatedDoc);
+      res.send(result);
+    })
 
 
 
