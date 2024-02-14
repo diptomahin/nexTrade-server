@@ -287,9 +287,7 @@ async function run() {
 
     // get coin
     app.get('/v1/api/allCoins', async (req, res) => {
-      const result = await allCoinCollection.find().sort({
-        _id: -1
-      }).toArray()
+      const result = await allCoinCollection.find().toArray()
       res.send(result)
     })
 
@@ -321,17 +319,9 @@ async function run() {
     // Delete asset from watchList
     app.delete('/v1/api/watchlist/:id', async (req, res) => {
       const assetId = req.params.id;
-      try {
-        const result = await watchListCollection.deleteOne({ _id: ObjectId(assetId) });
-        if (result.deletedCount === 1) {
-          res.status(200).json({ message: 'Asset deleted successfully' });
-        } else {
-          res.status(404).json({ message: 'Asset not found' });
-        }
-      } catch (error) {
-        console.error("Error:", error);
-        res.status(500).json({ error: "Internal server error" });
-      }
+      const query = { _id: new ObjectId(assetId) };
+      const result = await watchListCollection.deleteOne(query);
+      res.send(result);
     });
 
     // watchList related api ends here
