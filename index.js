@@ -90,16 +90,17 @@ async function run() {
       res.send(result)
     })
 
-
-    // get all users from usersCollection
+    // get all user
     app.get('/v1/api/all-users', async (req, res) => {
-      const userEmail = req.params.email;
-      const query = {
-        email: userEmail
-      }
-      const result = await usersCollection.find(query).toArray()
+      const result = await usersCollection.find().toArray()
       res.send(result)
     })
+
+
+    // get specific user by email from usersCollection
+    
+
+
 
     // get individual users info
     app.get('/v1/api/all-users/:email', async (req, res) => {
