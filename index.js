@@ -291,6 +291,14 @@ async function run() {
       res.send(result)
     })
 
+    // delete coin
+    app.delete('/v1/api/allCoins/:id', async (req, res) => {
+      const assetId = req.params.id;
+      const query = { _id: new ObjectId(assetId) };
+      const result = await allCoinCollection.deleteOne(query);
+      res.send(result);
+    });
+
 
 
     // watchList related api starts from here
