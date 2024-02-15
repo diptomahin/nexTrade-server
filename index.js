@@ -141,6 +141,16 @@ async function run() {
       res.send(result)
     })
 
+    // get individual users info
+    app.get('/v1/api/user/:email', async (req, res) => {
+      const userEmail = req.params.email;
+      const query = {
+        email: userEmail
+      }
+      const result = await usersCollection.findOne(query)
+      res.send(result)
+    })
+
 
 
     /// ======> Md. Nuruzzaman <====== ///
