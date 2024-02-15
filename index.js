@@ -97,8 +97,35 @@ async function run() {
     })
 
 
+    // put method
+    app.put('/v1/api/user/update/:email', async (req, res) => {
+
+      const userEmail = req.params.email;
+      const userDetails = req.body
+      const query = {
+        email: userEmail
+      }
+
+      const updateUserDetails = {
+        $set: {
+          name: userDetails.name,
+          username: userDetails.username,
+          phone: userDetails.phone,
+          address: userDetails.address,
+          currency: userDetails.currency,
+          photo: userDetails.photo,
+          // photo: userDetails.photo === null ? null : userDetails.photo
+        }
+      }
+
+      const result = await usersCollection.updateOne(query, updateUserDetails)
+      res.send(result)
+
+    })
+
+
     // get specific user by email from usersCollection
-    
+
 
 
 
@@ -296,7 +323,9 @@ async function run() {
     // delete coin
     app.delete('/v1/api/allCoins/:id', async (req, res) => {
       const assetId = req.params.id;
-      const query = { _id: new ObjectId(assetId) };
+      const query = {
+        _id: new ObjectId(assetId)
+      };
       const result = await allCoinCollection.deleteOne(query);
       res.send(result);
     });
@@ -305,7 +334,9 @@ async function run() {
     app.put('/v1/api/allCoins/:id', async (req, res) => {
       const assetId = req.params.id;
       const updatedCoin = req.body
-      const filter = { _id: new ObjectId(assetId) };
+      const filter = {
+        _id: new ObjectId(assetId)
+      };
       const updatedDoc = {
         $set: updatedCoin
       }
@@ -341,7 +372,9 @@ async function run() {
     // Delete asset from watchList
     app.delete('/v1/api/watchlist/:id', async (req, res) => {
       const assetId = req.params.id;
-      const query = { _id: new ObjectId(assetId) };
+      const query = {
+        _id: new ObjectId(assetId)
+      };
       const result = await watchListCollection.deleteOne(query);
       res.send(result);
     });
