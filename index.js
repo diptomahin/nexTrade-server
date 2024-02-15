@@ -98,12 +98,13 @@ async function run() {
 
 
     // put method
-    app.put('/v1/api/user/update/:email', async (req, res) => {
+    app.put('/v1/api/update-user/:email', async (req, res) => {
 
-      const userEmail = req.params.email;
-      const userDetails = req.body
+      const email = req.params.email;
+      console.log(email);
+      const userDetails = req.body;
       const query = {
-        email: userEmail
+        email: email
       }
 
       const updateUserDetails = {
@@ -114,7 +115,7 @@ async function run() {
           address: userDetails.address,
           currency: userDetails.currency,
           photo: userDetails.photo,
-          // photo: userDetails.photo === null ? null : userDetails.photo
+          lastUpdate: userDetails.lastUpdate
         }
       }
 
