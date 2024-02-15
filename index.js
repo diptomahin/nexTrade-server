@@ -124,10 +124,19 @@ async function run() {
 
     })
 
-
-    // get specific user by email from usersCollection
-
-
+    // promote or demote user
+    app.patch('/v1/api/all-users/:email/:role', async (req, res) => {
+      const userEmail = req.params.email;
+      const userRole = req.params.role
+      const filter = { email : userEmail };
+      const updatedDoc = {
+        $set: {
+          role: userRole
+        }
+      }
+      const result = await usersCollection.updateOne(filter, updatedDoc)
+      res.send(result);
+    })
 
 
     // get individual users info
