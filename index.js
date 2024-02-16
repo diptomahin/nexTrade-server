@@ -1,4 +1,5 @@
 const express = require('express');
+const admin = require('firebase-admin');
 const cors = require('cors');
 const {
   MongoClient,
@@ -10,6 +11,14 @@ require("dotenv").config();
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 const port = process.env.PORT || 5000;
+
+
+// firebase admin
+const serviceAccount = require('./firebase-admin-sdk.json');
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: 'nextrade-f82fb.firebaseapp.com' // Update with your Firebase project URL
+});
 
 //middleware
 app.use(cors());
@@ -128,13 +137,34 @@ async function run() {
     app.patch('/v1/api/all-users/:email/:role', async (req, res) => {
       const userEmail = req.params.email;
       const userRole = req.params.role
-      const filter = { email : userEmail };
+      const filter = { email: userEmail };
       const updatedDoc = {
         $set: {
           role: userRole
         }
       }
       const result = await usersCollection.updateOne(filter, updatedDoc)
+      res.send(result);
+    })
+
+    // delete user from firebase
+    app.post('/v1/api/deleteUserFromFirebase/:userID', async (req, res) => {
+      const uid = req.params.userID;
+      try {
+        await admin.auth().deleteUser(uid);
+        res.send({ success: true, message: `User ${uid} successfully deleted.` });
+      } catch (error) {
+        console.error('Error deleting user:', error);
+        res.status(500).json({ success: false, message: 'Error deleting user.' });
+      }
+    });
+
+    // delete user account
+    app.delete('/v1/api/all-users/:userId', async (req, res) => {
+      const userId = req.params.userId;
+      console.log(userId)
+      const query = { _id: new ObjectId(userId) };
+      const result = await usersCollection.deleteOne(query)
       res.send(result);
     })
 
