@@ -25,8 +25,7 @@ app.use(cors());
 app.use(express.json());
 // app.use(bodyParser.json());
 
-
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.pwyhut1.mongodb.net/?retryWrites=true&w=majority`;
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@nextradecluster.nvmjgdy.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -137,7 +136,9 @@ async function run() {
     app.patch('/v1/api/all-users/:email/:role', async (req, res) => {
       const userEmail = req.params.email;
       const userRole = req.params.role
-      const filter = { email: userEmail };
+      const filter = {
+        email: userEmail
+      };
       const updatedDoc = {
         $set: {
           role: userRole
@@ -152,10 +153,16 @@ async function run() {
       const uid = req.params.userID;
       try {
         await admin.auth().deleteUser(uid);
-        res.send({ success: true, message: `User ${uid} successfully deleted.` });
+        res.send({
+          success: true,
+          message: `User ${uid} successfully deleted.`
+        });
       } catch (error) {
         console.error('Error deleting user:', error);
-        res.status(500).json({ success: false, message: 'Error deleting user.' });
+        res.status(500).json({
+          success: false,
+          message: 'Error deleting user.'
+        });
       }
     });
 
@@ -163,7 +170,9 @@ async function run() {
     app.delete('/v1/api/all-users/:userId', async (req, res) => {
       const userId = req.params.userId;
       console.log(userId)
-      const query = { _id: new ObjectId(userId) };
+      const query = {
+        _id: new ObjectId(userId)
+      };
       const result = await usersCollection.deleteOne(query)
       res.send(result);
     })
