@@ -28,7 +28,9 @@ app.use(express.json());
 
 
 
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@nextradecluster.nvmjgdy.mongodb.net/?retryWrites=true&w=majority`;
+const uri = `mongodb+srv://NexTrade:pDR8dZkQhk65einI@nextradecluster.nvmjgdy.mongodb.net/?retryWrites=true&w=majority`;
+
+// const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@nextradecluster.nvmjgdy.mongodb.net/?retryWrites=true&w=majority`;
 
 
 
