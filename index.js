@@ -510,21 +510,8 @@ async function run() {
 
     //spot trading
 
-    app.post('/v1/api/spotTrading/:remainingBalance', async (req, res) => {
+    app.post('/v1/api/spotTrading/', async (req, res) => {
       const asset = req.body;
-      console.log(asset)
-      const remainingBalance = req.params.remainingBalance
-      // console.log(remainingBalance);
-
-      const filter = {
-        email: asset.assetBuyerEmail
-      };
-      const updatedDoc = {
-        $set: {
-          balance: remainingBalance
-        }
-      };
-      const result1 = await usersCollection.updateOne(filter, updatedDoc);
       const result = await spotTradingCollection.insertOne(asset)
       res.send(result);
     });
