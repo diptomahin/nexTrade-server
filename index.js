@@ -54,6 +54,7 @@ async function run() {
     const usersCollection = nexTrade.collection('all-users');
     const watchListCollection = nexTrade.collection('watchlist');
     const purchasedCollection = nexTrade.collection('purchasedAssets');
+    const spotTradingCollection = nexTrade.collection('spotTrading');
     const allCoinCollection = nexTrade.collection('allCoins');
     const depositWithdrawCollection = nexTrade.collection('depositWithdraw');
     const articleCollection = nexTrade.collection('articles');
@@ -504,6 +505,39 @@ async function run() {
       const result = await articleCollection.findOne(query);
       res.send(result)
     })
+
+    //----Mahin--------
+
+    //spot trading
+
+    app.post('/v1/api/spotTrading/:remainingBalance', async (req, res) => {
+      const asset = req.body;
+      console.log(asset)
+      const remainingBalance = req.params.remainingBalance
+      // console.log(remainingBalance);
+
+      const filter = {
+        email: asset.assetBuyerEmail
+      };
+      const updatedDoc = {
+        $set: {
+          balance: remainingBalance
+        }
+      };
+      const result1 = await usersCollection.updateOne(filter, updatedDoc);
+      const result = await spotTradingCollection.insertOne(asset)
+      res.send(result);
+    });
+
+    app.get('/v1/api/spotTrading', async (req, res) => {
+      const userEmail = req.query.email;
+      const query = {
+        assetBuyerEmail: userEmail
+      }
+      const result = await spotTradingCollection.find(query).toArray()
+      res.send(result)
+    })
+
 
 
     // Connect the client to the server	(optional starting in v4.7)
