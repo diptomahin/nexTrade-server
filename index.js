@@ -385,21 +385,22 @@ async function run() {
 
     // get coin
     app.get('/v1/api/allCoins', async (req, res) => {
-
-      const searchText = req.query.search; // Get search text from query parameters
-      if (searchText) {
-        const regex = new RegExp(searchText, 'i'); // Create a case-insensitive regex for searching
-
-        // Perform the search in the database
-        const searchResults = await allCoinCollection.find({ name: regex }); // Assuming 'name' is the field you want to search on
-
-        res.send(searchResults);
-      } else {
-        const result = await allCoinCollection.find().toArray()
-        res.send(result)
+      console.log(req.query)
+      try {
+        const searchText = req.query.search;
+        if ( searchText !== "") {
+          const coins = await allCoinCollection.find({ name: { $regex: searchText, $options: 'i' } }).toArray(); // Perform case-insensitive search
+          res.send(coins);
+          console.log(searchText);
+        } else {
+          const result = await allCoinCollection.find().toArray();
+          res.send(result);
+        }
+      } catch (error) {
+        console.error('Error retrieving coins:', error);
+        res.status(500).json({ message: 'Internal Server Error' });
       }
-
-    })
+    });
 
     // delete coin
     app.delete('/v1/api/allCoins/:id', async (req, res) => {
