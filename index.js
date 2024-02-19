@@ -522,9 +522,18 @@ async function run() {
 
     //spot trading
 
-    app.post('/v1/api/spotTrading/', async (req, res) => {
+    app.post('/v1/api/spotTrading', async (req, res) => {
       const asset = req.body;
       const result = await spotTradingCollection.insertOne(asset)
+      res.send(result);
+    });
+
+    app.delete('/v1/api/spotTrading/:id', async (req, res) => {
+      const assetId = req.params.id;
+      const query = {
+        _id: new ObjectId(assetId)
+      };
+      const result = await spotTradingCollection.deleteOne(query);
       res.send(result);
     });
 
