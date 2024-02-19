@@ -383,7 +383,7 @@ async function run() {
       res.send(result)
     })
 
-    // get coin
+    // get all coin in market page
     app.get('/v1/api/allCoins', async (req, res) => {
       console.log(req.query)
       try {
@@ -400,6 +400,12 @@ async function run() {
         console.error('Error retrieving coins:', error);
         res.status(500).json({ message: 'Internal Server Error' });
       }
+    });
+
+    // get all coin in manage coin page
+    app.get('/v1/api/manageAllCoins', async (req, res) => {
+          const result = await allCoinCollection.find().toArray();
+          res.send(result);
     });
 
     // delete coin
