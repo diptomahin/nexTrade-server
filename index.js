@@ -61,6 +61,37 @@ async function run() {
 
 
     // stripe //
+
+    // checkout api
+    app.get('/checkout-session/:session', async (req, res) => {
+      const sessionId = req.params.session;
+
+      // Validate sessionId
+      if (!sessionId || typeof sessionId !== 'string') {
+        return res.status(400).json({
+          error: 'Invalid session ID'
+        });
+      }
+
+      try {
+        const session = await stripe.checkout.sessions.retrieve(sessionId);
+
+        const invoice = await stripe.invoices.retrieve(session.invoice, {
+          expand: ['payment_intent'],
+        });
+        res.send({
+          session,
+          invoice
+        });
+      } catch (error) {
+        res.status(500).send({
+          error
+        });
+      }
+    });
+
+
+    // secret api
     app.post('/create-payment-intent', async (req, res) => {
       try {
         const {
@@ -389,7 +420,12 @@ async function run() {
       try {
         const searchText = req.query.search;
         if (searchText !== "") {
-          const coins = await allCoinCollection.find({ name: { $regex: searchText, $options: 'i' } }).toArray(); // Perform case-insensitive search
+          const coins = await allCoinCollection.find({
+            name: {
+              $regex: searchText,
+              $options: 'i'
+            }
+          }).toArray(); // Perform case-insensitive search
           res.send(coins);
           console.log(searchText);
         } else {
@@ -398,14 +434,16 @@ async function run() {
         }
       } catch (error) {
         console.error('Error retrieving coins:', error);
-        res.status(500).json({ message: 'Internal Server Error' });
+        res.status(500).json({
+          message: 'Internal Server Error'
+        });
       }
     });
 
     // get all coin in manage coin page
     app.get('/v1/api/manageAllCoins', async (req, res) => {
-          const result = await allCoinCollection.find().toArray();
-          res.send(result);
+      const result = await allCoinCollection.find().toArray();
+      res.send(result);
     });
 
     // delete coin
@@ -530,7 +568,11 @@ async function run() {
       const query = {
         _id: new ObjectId(id)
       }
-      const update = { $inc: { viewCount: 1 } };
+      const update = {
+        $inc: {
+          viewCount: 1
+        }
+      };
       const result = await articleCollection.updateOne(query, update);
       res.send(result)
     })
