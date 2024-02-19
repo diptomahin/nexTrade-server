@@ -385,8 +385,20 @@ async function run() {
 
     // get coin
     app.get('/v1/api/allCoins', async (req, res) => {
-      const result = await allCoinCollection.find().toArray()
-      res.send(result)
+
+      const searchText = req.query.search; // Get search text from query parameters
+      if (searchText) {
+        const regex = new RegExp(searchText, 'i'); // Create a case-insensitive regex for searching
+
+        // Perform the search in the database
+        const searchResults = await allCoinCollection.find({ name: regex }); // Assuming 'name' is the field you want to search on
+
+        res.send(searchResults);
+      } else {
+        const result = await allCoinCollection.find().toArray()
+        res.send(result)
+      }
+
     })
 
     // delete coin
