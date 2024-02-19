@@ -388,7 +388,7 @@ async function run() {
       console.log(req.query)
       try {
         const searchText = req.query.search;
-        if ( searchText !== "") {
+        if (searchText !== "") {
           const coins = await allCoinCollection.find({ name: { $regex: searchText, $options: 'i' } }).toArray(); // Perform case-insensitive search
           res.send(coins);
           console.log(searchText);
@@ -509,13 +509,27 @@ async function run() {
       res.send(result)
     })
 
-    // Read Single Article API's
+    // Article View Count API's
     app.get('/v1/api/articles/:id', async (req, res) => {
       const id = req.params.id;
       const query = {
         _id: new ObjectId(id)
       }
-      const result = await articleCollection.findOne(query);
+      const update = {$inc: {viewCount: 1}};
+      const result = await articleCollection.updateOne(query, update);
+      res.send(result)
+    })
+
+    app.patch('/v1/api/articles/viewCount/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = {
+        _id: new ObjectId(id)
+      }
+      const result = await articleCollection.updateOne(query, {
+        $inc: {
+          viewCount: 1
+        }
+      });
       res.send(result)
     })
 
