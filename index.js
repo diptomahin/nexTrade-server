@@ -509,14 +509,13 @@ async function run() {
       res.send(result)
     })
 
-    // Article View Count API's
+    // Read Single Article API's
     app.get('/v1/api/articles/:id', async (req, res) => {
       const id = req.params.id;
       const query = {
         _id: new ObjectId(id)
       }
-      const update = {$inc: {viewCount: 1}};
-      const result = await articleCollection.updateOne(query, update);
+      const result = await articleCollection.findOne(query);
       res.send(result)
     })
 
@@ -525,11 +524,8 @@ async function run() {
       const query = {
         _id: new ObjectId(id)
       }
-      const result = await articleCollection.updateOne(query, {
-        $inc: {
-          viewCount: 1
-        }
-      });
+      const update = { $inc: { viewCount: 1 } };
+      const result = await articleCollection.updateOne(query, update);
       res.send(result)
     })
 
