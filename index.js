@@ -133,8 +133,8 @@ async function run() {
         const userResult = await usersCollection.updateOne(query, userUpdateData);
 
         res.send({
+          product,
           success: true,
-          message: 'Your subscription payment was successful.'
         });
       } catch (error) {
         res.status(500).send({
