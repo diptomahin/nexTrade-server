@@ -649,7 +649,7 @@ async function run() {
       res.send(result);
     });
 
-    app.get('/v1/api/spotTrading', async (req, res) => {
+    app.get('/v1/api/spotTrading/:email', async (req, res) => {
       const userEmail = req.query.email;
       const query = {
         assetBuyerEmail: userEmail
