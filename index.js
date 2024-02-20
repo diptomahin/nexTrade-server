@@ -59,6 +59,7 @@ async function run() {
     const depositWithdrawCollection = nexTrade.collection('depositWithdraw');
     const invoicesCollection = nexTrade.collection('invoices');
     const articleCollection = nexTrade.collection('articles');
+    const notificationsCollection = nexTrade.collection('notifications');
 
 
     // stripe //
@@ -627,6 +628,30 @@ async function run() {
         }
       };
       const result = await articleCollection.updateOne(query, update);
+      res.send(result)
+    })
+
+    // Notifications data 
+
+     // post a user in notificationsCollection
+     app.post('/v1/api/notifications', async (req, res) => {
+      const userInfo = req.body;
+      const existingUser = await notificationsCollection.findOne({
+        email: userInfo.email
+      })
+      if (existingUser) {
+        return res.send({
+          message: 'user already exists',
+          insertedId: null
+        })
+      }
+      const result = await notificationsCollection.insertOne(userInfo);
+      res.send(result)
+    })
+
+    // get all notifications form data
+    app.get('/v1/api/notifications', async (req, res) => {
+      const result = await notificationsCollection.find().toArray()
       res.send(result)
     })
 
