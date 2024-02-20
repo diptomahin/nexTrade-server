@@ -635,17 +635,8 @@ async function run() {
 
      // post a user in notificationsCollection
      app.post('/v1/api/notifications', async (req, res) => {
-      const userInfo = req.body;
-      const existingUser = await notificationsCollection.findOne({
-        email: userInfo.email
-      })
-      if (existingUser) {
-        return res.send({
-          message: 'user already exists',
-          insertedId: null
-        })
-      }
-      const result = await notificationsCollection.insertOne(userInfo);
+      const assetInfo = req.body;
+      const result = await notificationsCollection.insertOne(assetInfo);
       res.send(result)
     })
 
