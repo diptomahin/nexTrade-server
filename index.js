@@ -650,7 +650,7 @@ async function run() {
     });
 
     app.get('/v1/api/spotTrading', async (req, res) => {
-      const result = await usersCollection.find().toArray()
+      const result = await spotTradingCollection.find().toArray()
       res.send(result)
     })
 
