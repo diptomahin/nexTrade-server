@@ -57,35 +57,88 @@ async function run() {
     const spotTradingCollection = nexTrade.collection('spotTrading');
     const allCoinCollection = nexTrade.collection('allCoins');
     const depositWithdrawCollection = nexTrade.collection('depositWithdraw');
+    const invoicesCollection = nexTrade.collection('invoices');
     const articleCollection = nexTrade.collection('articles');
 
 
     // stripe //
 
     // checkout api
-    app.get('/checkout-session/:session', async (req, res) => {
-      const sessionId = req.params.session;
-
-      // Validate sessionId
-      if (!sessionId || typeof sessionId !== 'string') {
-        return res.status(400).json({
-          error: 'Invalid session ID'
-        });
-      }
-
+    app.post('/v1/api/checkout-session', async (req, res) => {
       try {
+        const {
+          email,
+          sessionId
+        } = req.body;
+
+        // Validate request body
+        if (!email || typeof email !== 'string' || !sessionId || typeof sessionId !== 'string') {
+          return res.status(400).send({
+            error: 'Invalid request body. Both email and sessionId are required and must be strings.'
+          });
+        }
+
+        // Retrieve session information
         const session = await stripe.checkout.sessions.retrieve(sessionId);
 
+        // Check if session is valid
+        if (!session || !session.id) {
+          return res.status(400).send({
+            error: 'Invalid session ID. Session not found.'
+          });
+        }
+
+        // Retrieve invoice information
         const invoice = await stripe.invoices.retrieve(session.invoice, {
           expand: ['payment_intent'],
         });
-        res.send({
+
+        // Retrieve customer information
+        const customer = await stripe.customers.retrieve(session.customer);
+
+        // Retrieve subscription information
+        const subscription = await stripe.subscriptions.retrieve(session.subscription);
+
+        // Retrieve product details
+        const product = await stripe.products.retrieve(subscription.plan.product);
+
+        const query = {
+          email
+        };
+
+        // Insert invoice data
+        const invoiceData = {
+          email,
           session,
-          invoice
+          invoice,
+          customer,
+          subscription,
+          product
+        };
+        const invoiceResult = await invoicesCollection.insertOne(invoiceData);
+
+        // Check if invoice data was inserted successfully
+        if (!invoiceResult.insertedId) {
+          return res.status(500).send({
+            error: 'Failed to insert invoice data.'
+          });
+        }
+
+        // Update user status
+        const userUpdateData = {
+          $set: {
+            status: product.name
+          }
+        };
+        const userResult = await usersCollection.updateOne(query, userUpdateData);
+
+        res.send({
+          success: true,
+          message: 'Your subscription payment was successful.'
         });
       } catch (error) {
         res.status(500).send({
-          error
+          error: 'An unexpected error occurred while processing the checkout session.'
         });
       }
     });
