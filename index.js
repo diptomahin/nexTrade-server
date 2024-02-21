@@ -663,6 +663,16 @@ app.get('/v1/api/notifications', async (req, res) => {
   }
 });
 
+ // Delete asset from watchList
+ app.delete('/v1/api/notifications/:id', async (req, res) => {
+  const assetId = req.params.id;
+  const query = {
+    _id: new ObjectId(assetId)
+  };
+  const result = await notificationsCollection.deleteOne(query);
+  res.send(result);
+});
+
     //----Mahin--------
 
     //spot trading
