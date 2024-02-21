@@ -642,16 +642,26 @@ async function run() {
 
     // get all notifications form data
     
-    app.get('/v1/api/notifications', async (req, res) => {
-      const email = req.query.email
-      const query = {
-        assetBuyerEmail: email
-      };
-      const result = await notificationsCollection.find(query).sort({
+    // API endpoint to get notifications for a specific email
+app.get('/v1/api/notifications', async (req, res) => {
+  const email = req.query.email;
+  const query = {
+    assetBuyerEmail: email
+  };
+
+  try {
+    const result = await notificationsCollection.find(query)
+      .sort({
         createdAt: -1
-      }).toArray()
-      res.send(result)
-    })
+      })
+      .toArray();
+
+    res.send(result);
+  } catch (error) {
+    console.error("Error retrieving notifications:", error);
+    res.status(500).send("Internal Server Error");
+  }
+});
 
     //----Mahin--------
 
