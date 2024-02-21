@@ -645,7 +645,7 @@ async function run() {
     app.get('/v1/api/notifications', async (req, res) => {
       const email = req.query.email
       const query = {
-        email: email
+        assetBuyerEmail: email
       };
       const result = await notificationsCollection.find(query).sort({
         createdAt: -1
