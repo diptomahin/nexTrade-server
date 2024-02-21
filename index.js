@@ -641,10 +641,17 @@ async function run() {
     })
 
     // get all notifications form data
+    
     app.get('/v1/api/notifications', async (req, res) => {
-      const result = await notificationsCollection.find().sort({ createdAt: -1 }).toArray();
-      res.send(result);
-    });
+      const email = req.query.email
+      const query = {
+        email: email
+      };
+      const result = await notificationsCollection.find(query).sort({
+        createdAt: -1
+      }).toArray()
+      res.send(result)
+    })
 
     //----Mahin--------
 
