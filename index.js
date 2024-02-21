@@ -55,7 +55,8 @@ async function run() {
     const watchListCollection = nexTrade.collection('watchlist');
     const purchasedCollection = nexTrade.collection('purchasedAssets');
     const spotTradingCollection = nexTrade.collection('spotTrading');
-    const allCoinCollection = nexTrade.collection('allCoins');
+    const allCryptoCoinCollection = nexTrade.collection('allCryptoCoins');
+    const allFlatCoinCollection = nexTrade.collection('allFlatCoins');
     const depositWithdrawCollection = nexTrade.collection('depositWithdraw');
     const invoicesCollection = nexTrade.collection('invoices');
     const articleCollection = nexTrade.collection('articles');
@@ -461,29 +462,36 @@ async function run() {
 
     // manage coin related api
 
-    // add coin
-    app.post('/v1/api/allCoins', async (req, res) => {
+    // add crypto coin
+    app.post('/v1/api/allCryptoCoins', async (req, res) => {
       const assetInfo = req.body;
-      const result = await allCoinCollection.insertOne(assetInfo);
+      const result = await allCryptoCoinCollection.insertOne(assetInfo);
       res.send(result)
     })
 
-    // get all coin in market page
-    app.get('/v1/api/allCoins', async (req, res) => {
-      console.log(req.query)
+    // add flat coin
+    app.post('/v1/api/allFlatCoins', async (req, res) => {
+      const assetInfo = req.body;
+      const result = await allFlatCoinCollection.insertOne(assetInfo);
+      res.send(result)
+    })
+
+    // get all crypto coin in market page
+    app.get('/v1/api/allCryptoCoins', async (req, res) => {
+      // console.log(req.query)
       try {
         const searchText = req.query.search;
         if (searchText !== "") {
-          const coins = await allCoinCollection.find({
+          const coins = await allCryptoCoinCollection.find({
             name: {
               $regex: searchText,
               $options: 'i'
             }
           }).toArray(); // Perform case-insensitive search
           res.send(coins);
-          console.log(searchText);
+          // console.log(searchText);
         } else {
-          const result = await allCoinCollection.find().toArray();
+          const result = await allCryptoCoinCollection.find().toArray();
           res.send(result);
         }
       } catch (error) {
@@ -494,24 +502,65 @@ async function run() {
       }
     });
 
-    // get all coin in manage coin page
-    app.get('/v1/api/manageAllCoins', async (req, res) => {
-      const result = await allCoinCollection.find().toArray();
+    // get all flat coin in market page
+    app.get('/v1/api/allFlatCoins', async (req, res) => {
+      // console.log(req.query)
+      try {
+        const searchText = req.query.search;
+        if (searchText !== "") {
+          const coins = await allFlatCoinCollection.find({
+            name: {
+              $regex: searchText,
+              $options: 'i'
+            }
+          }).toArray(); // Perform case-insensitive search
+          res.send(coins);
+          // console.log(searchText);
+        } else {
+          const result = await allFlatCoinCollection.find().toArray();
+          res.send(result);
+        }
+      } catch (error) {
+        console.error('Error retrieving coins:', error);
+        res.status(500).json({
+          message: 'Internal Server Error'
+        });
+      }
+    });
+
+    // get all crypto coin in manage coin page
+    app.get('/v1/api/manageAllCryptoCoins', async (req, res) => {
+      const result = await allCryptoCoinCollection.find().toArray();
+      res.send(result);
+    });
+    // get all flat coin in manage coin page
+    app.get('/v1/api/manageAllFlatCoins', async (req, res) => {
+      const result = await allFlatCoinCollection.find().toArray();
       res.send(result);
     });
 
-    // delete coin
-    app.delete('/v1/api/allCoins/:id', async (req, res) => {
+    // delete crypto coin
+    app.delete('/v1/api/allCryptoCoins/:id', async (req, res) => {
       const assetId = req.params.id;
       const query = {
         _id: new ObjectId(assetId)
       };
-      const result = await allCoinCollection.deleteOne(query);
+      const result = await allCryptoCoinCollection.deleteOne(query);
       res.send(result);
     });
 
-    // update coin
-    app.put('/v1/api/allCoins/:id', async (req, res) => {
+    // delete flat coin
+    app.delete('/v1/api/allFlatCoins/:id', async (req, res) => {
+      const assetId = req.params.id;
+      const query = {
+        _id: new ObjectId(assetId)
+      };
+      const result = await allFlatCoinCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    // update crypto coin
+    app.put('/v1/api/allCryptoCoins/:id', async (req, res) => {
       const assetId = req.params.id;
       const updatedCoin = req.body
       const filter = {
@@ -520,7 +569,21 @@ async function run() {
       const updatedDoc = {
         $set: updatedCoin
       }
-      const result = await allCoinCollection.updateOne(filter, updatedDoc);
+      const result = await allCryptoCoinCollection.updateOne(filter, updatedDoc);
+      res.send(result);
+    })
+
+    // update flat coin
+    app.put('/v1/api/allFlatCoins/:id', async (req, res) => {
+      const assetId = req.params.id;
+      const updatedCoin = req.body
+      const filter = {
+        _id: new ObjectId(assetId)
+      };
+      const updatedDoc = {
+        $set: updatedCoin
+      }
+      const result = await allFlatCoinCollection.updateOne(filter, updatedDoc);
       res.send(result);
     })
 
