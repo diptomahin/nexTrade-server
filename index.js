@@ -482,6 +482,12 @@ async function run() {
       res.send({ count });
     })
 
+    // get total flat count 
+    app.get('/v1/api/totalFlatCount', async (req, res) => {
+      const count = await allFlatCoinCollection.estimatedDocumentCount();
+      res.send({ count });
+    })
+
     // get all crypto coin in market page
     app.get('/v1/api/allCryptoCoins', async (req, res) => {
       const page = parseInt(req.query.page);
