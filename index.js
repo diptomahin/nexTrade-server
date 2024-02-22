@@ -716,7 +716,7 @@ async function run() {
       try {
         const result = await notificationsCollection.find(query)
           .sort({
-            createdAt: -1
+            _id: -1
           })
           .toArray();
 
@@ -727,7 +727,7 @@ async function run() {
       }
     });
 
-    // Delete asset from watchList
+    // Delete asset from Notifications
     app.delete('/v1/api/notifications/:id', async (req, res) => {
       const assetId = req.params.id;
       const query = {
@@ -736,6 +736,30 @@ async function run() {
       const result = await notificationsCollection.deleteOne(query);
       res.send(result);
     });
+
+    // exchange api data
+    app.put('/v1/api/exchangeAssets/:firstCoinId/:secondCoinId', async (req, res) => {
+      const firstCoinId = req.params.firstCoinId
+      const secondCoinId = req.params.secondCoinId
+
+      const getFirstCoin = await purchasedCollection.find({_id: new ObjectId(firstCoinId)}).toArray() 
+      const getSecondCoin = await purchasedCollection.find({_id: new ObjectId(secondCoinId)}).toArray() 
+
+      const calculateTotalInvestment = parseFloat(getFirstCoin[0].totalInvestment) + parseFloat(getSecondCoin[0].totalInvestment)
+
+      const updatedDoc = {
+        $set: {
+          totalInvestment: calculateTotalInvestment
+        }
+      };
+
+      const result = await purchasedCollection.updateOne({_id: new ObjectId(secondCoinId)}, updatedDoc)
+      res.send(result)
+
+      const result2 = await purchasedCollection.deleteOne({_id: new ObjectId(firstCoinId)})
+
+
+    })
 
     //----Mahin--------
 
