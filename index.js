@@ -476,56 +476,51 @@ async function run() {
       res.send(result)
     })
 
+    // get total crypto count 
+    app.get('/v1/api/totalCryptoCount', async (req, res) => {
+      const count = await allCryptoCoinCollection.estimatedDocumentCount();
+      res.send({ count });
+    })
+
     // get all crypto coin in market page
     app.get('/v1/api/allCryptoCoins', async (req, res) => {
-      // console.log(req.query)
-      try {
-        const searchText = req.query.search;
-        if (searchText !== "") {
-          const coins = await allCryptoCoinCollection.find({
-            name: {
-              $regex: searchText,
-              $options: 'i'
-            }
-          }).toArray(); // Perform case-insensitive search
-          res.send(coins);
-          // console.log(searchText);
-        } else {
-          const result = await allCryptoCoinCollection.find().toArray();
-          res.send(result);
-        }
-      } catch (error) {
-        console.error('Error retrieving coins:', error);
-        res.status(500).json({
-          message: 'Internal Server Error'
-        });
+      const page = parseInt(req.query.page);
+      const size = parseInt(req.query.size) 
+      const searchText = req.query.search;
+      if (searchText) {
+        const coins = await allCryptoCoinCollection.find({
+          name: {
+            $regex: searchText,
+            $options: 'i'
+          }
+        }).toArray(); // Perform case-insensitive search
+        res.send(coins);
+      } else {
+        const result = await allCryptoCoinCollection.find().skip(page * size).limit(size).toArray();
+        res.send(result);
       }
+
     });
 
     // get all flat coin in market page
     app.get('/v1/api/allFlatCoins', async (req, res) => {
-      // console.log(req.query)
-      try {
-        const searchText = req.query.search;
-        if (searchText !== "") {
-          const coins = await allFlatCoinCollection.find({
-            name: {
-              $regex: searchText,
-              $options: 'i'
-            }
-          }).toArray(); // Perform case-insensitive search
-          res.send(coins);
-          // console.log(searchText);
-        } else {
-          const result = await allFlatCoinCollection.find().toArray();
-          res.send(result);
-        }
-      } catch (error) {
-        console.error('Error retrieving coins:', error);
-        res.status(500).json({
-          message: 'Internal Server Error'
-        });
+
+      const page = parseInt(req.query.page);
+      const size = parseInt(req.query.size)
+      const searchText = req.query.search;
+      if (searchText) {
+        const coins = await allFlatCoinCollection.find({
+          name: {
+            $regex: searchText,
+            $options: 'i'
+          }
+        }).toArray();
+        res.send(coins);
+      } else {
+        const result = await allFlatCoinCollection.find().skip(page * size).limit(size).toArray();
+        res.send(result);
       }
+
     });
 
     // get all crypto coin in manage coin page
@@ -696,45 +691,45 @@ async function run() {
 
     // Notifications data 
 
-     // post a user in notificationsCollection
-     app.post('/v1/api/notifications', async (req, res) => {
+    // post a user in notificationsCollection
+    app.post('/v1/api/notifications', async (req, res) => {
       const assetInfo = req.body;
       const result = await notificationsCollection.insertOne(assetInfo);
       res.send(result)
     })
 
     // get all notifications form data
-    
+
     // API endpoint to get notifications for a specific email
-app.get('/v1/api/notifications', async (req, res) => {
-  const email = req.query.email;
-  const query = {
-    assetBuyerEmail: email
-  };
+    app.get('/v1/api/notifications', async (req, res) => {
+      const email = req.query.email;
+      const query = {
+        assetBuyerEmail: email
+      };
 
-  try {
-    const result = await notificationsCollection.find(query)
-      .sort({
-        createdAt: -1
-      })
-      .toArray();
+      try {
+        const result = await notificationsCollection.find(query)
+          .sort({
+            createdAt: -1
+          })
+          .toArray();
 
-    res.send(result);
-  } catch (error) {
-    console.error("Error retrieving notifications:", error);
-    res.status(500).send("Internal Server Error");
-  }
-});
+        res.send(result);
+      } catch (error) {
+        console.error("Error retrieving notifications:", error);
+        res.status(500).send("Internal Server Error");
+      }
+    });
 
- // Delete asset from watchList
- app.delete('/v1/api/notifications/:id', async (req, res) => {
-  const assetId = req.params.id;
-  const query = {
-    _id: new ObjectId(assetId)
-  };
-  const result = await notificationsCollection.deleteOne(query);
-  res.send(result);
-});
+    // Delete asset from watchList
+    app.delete('/v1/api/notifications/:id', async (req, res) => {
+      const assetId = req.params.id;
+      const query = {
+        _id: new ObjectId(assetId)
+      };
+      const result = await notificationsCollection.deleteOne(query);
+      res.send(result);
+    });
 
     //----Mahin--------
 
@@ -760,7 +755,7 @@ app.get('/v1/api/notifications', async (req, res) => {
       res.send(result)
     })
 
- 
+
 
 
 
