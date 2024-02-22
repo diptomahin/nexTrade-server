@@ -646,14 +646,7 @@ async function run() {
       res.send(result);
     });
 
-    app.get('/v1/api/purchasedAssets', async (req, res) => {
-      const userEmail = req.query.email;
-      const query = {
-        assetBuyerEmail: userEmail
-      }
-      const result = await purchasedCollection.find(query).toArray()
-      res.send(result)
-    })
+    
 
 
     // Ariful's API's
@@ -759,6 +752,16 @@ async function run() {
       const result2 = await purchasedCollection.deleteOne({_id: new ObjectId(firstCoinId)})
 
 
+    })
+
+    // portfolio get data 
+    app.get('/v1/api/purchasedAssets', async (req, res) => {
+      const userEmail = req.query.email;
+      const query = {
+        assetBuyerEmail: userEmail
+      }
+      const result = await purchasedCollection.find(query).toArray()
+      res.send(result)
     })
 
     //----Mahin--------
