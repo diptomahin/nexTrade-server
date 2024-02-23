@@ -316,7 +316,6 @@ async function run() {
       res.send(result)
     })
 
-
     // --------Julfiker Ali-------- //
     // Delete asset from watchList
     app.delete('/v1/api/watchlist/:id', async (req, res) => {
