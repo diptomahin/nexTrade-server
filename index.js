@@ -61,6 +61,7 @@ async function run() {
     const invoicesCollection = nexTrade.collection('invoices');
     const articleCollection = nexTrade.collection('articles');
     const notificationsCollection = nexTrade.collection('notifications');
+    const feedbackCollection = nexTrade.collection('feedbacks');
 
 
     // stripe //
@@ -625,8 +626,27 @@ async function run() {
 
     // watchList related api ends here
 
-    // buy related api starts from here
+    // send feedback
+    app.post('/v1/api/feedback', async (req, res) => {
+      const feedbackData = req.body;
+      const result = await feedbackCollection.insertOne(feedbackData);
+      res.send(result)
+    })
 
+    // get feedback
+    app.get('/v1/api/feedback', async (req, res) => {
+      const email = req.query.email
+      const query = {
+        reviewerEmail: email
+      };
+      const result = await feedbackCollection.find(query).sort({
+        _id: -1
+      }).toArray();
+      res.send(result)
+    })
+
+
+    // buy related api starts from here
     app.post('/v1/api/purchasedAssets/:remainingBalance', async (req, res) => {
       const asset = req.body;
       console.log(asset)
