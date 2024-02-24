@@ -379,7 +379,8 @@ async function run() {
 
         const depositInfo = {
           $set: {
-            balance: parseFloat(userData.balance) + parseFloat(depositData.amount)
+            balance: parseFloat(userData.balance) + parseFloat(depositData.amount),
+            deposit: parseFloat(userData.deposit) + parseFloat(depositData.amount)
           },
         };
         const balanceResult = await usersCollection.updateOne(query, depositInfo);
@@ -430,7 +431,8 @@ async function run() {
 
         const withdrawInfo = {
           $set: {
-            balance: newBalance
+            balance: newBalance,
+            withdraw: parseFloat(userData.withdraw) + parseFloat(withdrawData.amount),
           }
         };
         const balanceResult = await usersCollection.updateOne(query, withdrawInfo);
