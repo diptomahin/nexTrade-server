@@ -843,8 +843,6 @@ async function run() {
       res.send(result);
     });
 
-
-
     // exchange api data
     app.put('/v1/api/exchangeAssets/:firstCoinId/:secondCoinId', async (req, res) => {
       const firstCoinId = req.params.firstCoinId
