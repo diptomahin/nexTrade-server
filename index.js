@@ -64,7 +64,8 @@ async function run() {
     const notificationsCollection = nexTrade.collection('notifications');
 
 
-    // stripe //
+    //  ========== Stripe APIs ========== //
+    //  ========== Stripe APIs ========== //
 
     // checkout api
     app.post('/v1/api/checkout-session', async (req, res) => {
@@ -146,7 +147,6 @@ async function run() {
       }
     });
 
-
     // secret api
     app.post('/create-payment-intent', async (req, res) => {
       try {
@@ -177,7 +177,36 @@ async function run() {
     });
 
 
-    // user related api starts form here
+    //  ========== user collection APIs ========== //
+    //  ========== user collection APIs ========== //
+
+    // get all user
+    app.get('/v1/api/all-users', async (req, res) => {
+      const result = await usersCollection.find().toArray()
+      res.send(result)
+    })
+
+    // get individual users info
+    app.get('/v1/api/all-users/:email', async (req, res) => {
+      const userEmail = req.params.email;
+      const query = {
+        email: userEmail
+      }
+      const result = await usersCollection.find(query).sort({
+        _id: -1
+      }).toArray(); // get user in lifo methods
+      res.send(result)
+    })
+
+    // get individual users info
+    app.get('/v1/api/user/:email', async (req, res) => {
+      const userEmail = req.params.email;
+      const query = {
+        email: userEmail
+      }
+      const result = await usersCollection.findOne(query)
+      res.send(result)
+    })
 
     // post a user in usersCollection
     app.post('/v1/api/all-users', async (req, res) => {
@@ -194,13 +223,6 @@ async function run() {
       const result = await usersCollection.insertOne(userInfo);
       res.send(result)
     })
-
-    // get all user
-    app.get('/v1/api/all-users', async (req, res) => {
-      const result = await usersCollection.find().toArray()
-      res.send(result)
-    })
-
 
     // put method
     app.put('/v1/api/update-user/:email', async (req, res) => {
@@ -275,31 +297,9 @@ async function run() {
     })
 
 
-    // get individual users info
-    app.get('/v1/api/all-users/:email', async (req, res) => {
-      const userEmail = req.params.email;
-      const query = {
-        email: userEmail
-      }
-      const result = await usersCollection.find(query).sort({
-        _id: -1
-      }).toArray(); // get user in lifo methods
-      res.send(result)
-    })
 
-    // get individual users info
-    app.get('/v1/api/user/:email', async (req, res) => {
-      const userEmail = req.params.email;
-      const query = {
-        email: userEmail
-      }
-      const result = await usersCollection.findOne(query)
-      res.send(result)
-    })
-
-
-
-    /// ======> Md. Nuruzzaman <====== ///
+    //  ========== depositWithdraw collection APIs ========== //
+    //  ========== depositWithdraw collection APIs ========== //
 
     // get all deposit and withdraw data
     app.get('/v1/api/deposit-withdraw/:email', async (req, res) => {
@@ -360,7 +360,6 @@ async function run() {
       res.send(result);
     });
 
-
     // post deposit data
     app.post('/v1/api/deposit/:email', async (req, res) => {
       try {
@@ -402,7 +401,6 @@ async function run() {
         });
       }
     });
-
 
     //  post withdraw data
     app.post('/v1/api/withdraw/:email', async (req, res) => {
@@ -456,38 +454,44 @@ async function run() {
       }
     });
 
+    // delete all deposit and withdraw data
+    app.delete('/v1/api/deposit-withdraw/delete-all/:email', async (req, res) => {
+      const userEmail = req.params.email;
+      const query = {
+        email: userEmail
+      }
 
-
-
-    // user related api ends here
-
-    // manage coin related api
-
-    // add crypto coin
-    app.post('/v1/api/allCryptoCoins', async (req, res) => {
-      const assetInfo = req.body;
-      const result = await allCryptoCoinCollection.insertOne(assetInfo);
+      const result = await depositWithdrawCollection.deleteMany(query)
       res.send(result)
+
     })
 
-    // add flat coin
-    app.post('/v1/api/allFlatCoins', async (req, res) => {
-      const assetInfo = req.body;
-      const result = await allFlatCoinCollection.insertOne(assetInfo);
+    // delete specific deposit and withdraw data
+    app.delete('/v1/api/deposit-withdraw/delete-specific/:id', async (req, res) => {
+      const userId = req.params.id;
+      const query = {
+        _id: new ObjectId(userId)
+      }
+
+      const result = await depositWithdrawCollection.deleteMany(query)
       res.send(result)
+
     })
+
+
+
+    //  ========== allCryptoCoins collection APIs ========== //
+    //  ========== allCryptoCoins collection APIs ========== //
+
+    // get all crypto coin in manage coin page
+    app.get('/v1/api/manageAllCryptoCoins', async (req, res) => {
+      const result = await allCryptoCoinCollection.find().toArray();
+      res.send(result);
+    });
 
     // get total crypto count 
     app.get('/v1/api/totalCryptoCount', async (req, res) => {
       const count = await allCryptoCoinCollection.estimatedDocumentCount();
-      res.send({
-        count
-      });
-    })
-
-    // get total flat count 
-    app.get('/v1/api/totalFlatCount', async (req, res) => {
-      const count = await allFlatCoinCollection.estimatedDocumentCount();
       res.send({
         count
       });
@@ -513,6 +517,56 @@ async function run() {
 
     });
 
+    // add crypto coin
+    app.post('/v1/api/allCryptoCoins', async (req, res) => {
+      const assetInfo = req.body;
+      const result = await allCryptoCoinCollection.insertOne(assetInfo);
+      res.send(result)
+    })
+
+    // update crypto coin
+    app.put('/v1/api/allCryptoCoins/:id', async (req, res) => {
+      const assetId = req.params.id;
+      const updatedCoin = req.body
+      const filter = {
+        _id: new ObjectId(assetId)
+      };
+      const updatedDoc = {
+        $set: updatedCoin
+      }
+      const result = await allCryptoCoinCollection.updateOne(filter, updatedDoc);
+      res.send(result);
+    })
+
+    // delete crypto coin
+    app.delete('/v1/api/allCryptoCoins/:id', async (req, res) => {
+      const assetId = req.params.id;
+      const query = {
+        _id: new ObjectId(assetId)
+      };
+      const result = await allCryptoCoinCollection.deleteOne(query);
+      res.send(result);
+    });
+
+
+
+    //  ========== allFlatCoin collection APIs ========== //
+    //  ========== allFlatCoin collection APIs ========== //
+
+    // get all flat coin in manage coin page
+    app.get('/v1/api/manageAllFlatCoins', async (req, res) => {
+      const result = await allFlatCoinCollection.find().toArray();
+      res.send(result);
+    });
+
+    // get total flat count 
+    app.get('/v1/api/totalFlatCount', async (req, res) => {
+      const count = await allFlatCoinCollection.estimatedDocumentCount();
+      res.send({
+        count
+      });
+    })
+
     // get all flat coin in market page
     app.get('/v1/api/allFlatCoins', async (req, res) => {
 
@@ -534,49 +588,11 @@ async function run() {
 
     });
 
-    // get all crypto coin in manage coin page
-    app.get('/v1/api/manageAllCryptoCoins', async (req, res) => {
-      const result = await allCryptoCoinCollection.find().toArray();
-      res.send(result);
-    });
-    // get all flat coin in manage coin page
-    app.get('/v1/api/manageAllFlatCoins', async (req, res) => {
-      const result = await allFlatCoinCollection.find().toArray();
-      res.send(result);
-    });
-
-    // delete crypto coin
-    app.delete('/v1/api/allCryptoCoins/:id', async (req, res) => {
-      const assetId = req.params.id;
-      const query = {
-        _id: new ObjectId(assetId)
-      };
-      const result = await allCryptoCoinCollection.deleteOne(query);
-      res.send(result);
-    });
-
-    // delete flat coin
-    app.delete('/v1/api/allFlatCoins/:id', async (req, res) => {
-      const assetId = req.params.id;
-      const query = {
-        _id: new ObjectId(assetId)
-      };
-      const result = await allFlatCoinCollection.deleteOne(query);
-      res.send(result);
-    });
-
-    // update crypto coin
-    app.put('/v1/api/allCryptoCoins/:id', async (req, res) => {
-      const assetId = req.params.id;
-      const updatedCoin = req.body
-      const filter = {
-        _id: new ObjectId(assetId)
-      };
-      const updatedDoc = {
-        $set: updatedCoin
-      }
-      const result = await allCryptoCoinCollection.updateOne(filter, updatedDoc);
-      res.send(result);
+    // add flat coin
+    app.post('/v1/api/allFlatCoins', async (req, res) => {
+      const assetInfo = req.body;
+      const result = await allFlatCoinCollection.insertOne(assetInfo);
+      res.send(result)
     })
 
     // update flat coin
@@ -593,16 +609,20 @@ async function run() {
       res.send(result);
     })
 
+    // delete flat coin
+    app.delete('/v1/api/allFlatCoins/:id', async (req, res) => {
+      const assetId = req.params.id;
+      const query = {
+        _id: new ObjectId(assetId)
+      };
+      const result = await allFlatCoinCollection.deleteOne(query);
+      res.send(result);
+    });
 
 
-    // watchList related api starts from here
 
-    // add an asset to watchist
-    app.post('/v1/api/watchlist', async (req, res) => {
-      const assetInfo = req.body;
-      const result = await watchListCollection.insertOne(assetInfo);
-      res.send(result)
-    })
+    //  ========== watchList collection APIs ========== //
+    //  ========== watchList collection APIs ========== //
 
     // get watchilst info for individual user
     app.get('/v1/api/watchlist', async (req, res) => {
@@ -616,8 +636,13 @@ async function run() {
       res.send(result)
     })
 
+    // add an asset to watchist
+    app.post('/v1/api/watchlist', async (req, res) => {
+      const assetInfo = req.body;
+      const result = await watchListCollection.insertOne(assetInfo);
+      res.send(result)
+    })
 
-    // --------Julfiker Ali-------- //
     // Delete asset from watchList
     app.delete('/v1/api/watchlist/:id', async (req, res) => {
       const assetId = req.params.id;
@@ -628,14 +653,10 @@ async function run() {
       res.send(result);
     });
 
-    // watchList related api ends here
 
-    // send feedback
-    app.post('/v1/api/feedback', async (req, res) => {
-      const feedbackData = req.body;
-      const result = await feedbackCollection.insertOne(feedbackData);
-      res.send(result)
-    })
+
+    //  ========== feedback collection APIs ========== //
+    //  ========== feedback collection APIs ========== //
 
     // get feedback
     app.get('/v1/api/feedback', async (req, res) => {
@@ -649,38 +670,17 @@ async function run() {
       res.send(result)
     })
 
-
-    // buy related api starts from here
-    app.post('/v1/api/purchasedAssets/:remainingBalance', async (req, res) => {
-      const asset = req.body;
-      console.log(asset)
-      const remainingBalance = req.params.remainingBalance
-      // console.log(remainingBalance);
-
-      const filter = {
-        email: asset.assetBuyerEmail
-      };
-      const updatedDoc = {
-        $set: {
-          balance: remainingBalance
-        }
-      };
-      const result1 = await usersCollection.updateOne(filter, updatedDoc);
-      const result = await purchasedCollection.insertOne(asset)
-      res.send(result);
-    });
-
-
-
-
-    // Ariful's API's
-
-    // article API's
-    app.post('/v1/api/articles', async (req, res) => {
-      const articleInfo = req.body;
-      const result = await articleCollection.insertOne(articleInfo);
+    // send feedback
+    app.post('/v1/api/feedback', async (req, res) => {
+      const feedbackData = req.body;
+      const result = await feedbackCollection.insertOne(feedbackData);
       res.send(result)
     })
+
+
+
+    //  ========== articles collection APIs ========== //
+    //  ========== articles collection APIs ========== //
 
     // Read articles API's
     app.get('/v1/api/articles', async (req, res) => {
@@ -698,6 +698,13 @@ async function run() {
       res.send(result)
     })
 
+    // article API's
+    app.post('/v1/api/articles', async (req, res) => {
+      const articleInfo = req.body;
+      const result = await articleCollection.insertOne(articleInfo);
+      res.send(result)
+    })
+
     app.patch('/v1/api/articles/viewCount/:id', async (req, res) => {
       const id = req.params.id;
       const query = {
@@ -712,16 +719,10 @@ async function run() {
       res.send(result)
     })
 
-    // Notifications data 
 
-    // post a user in notificationsCollection
-    app.post('/v1/api/notifications', async (req, res) => {
-      const assetInfo = req.body;
-      const result = await notificationsCollection.insertOne(assetInfo);
-      res.send(result)
-    })
 
-    // get all notifications form data
+    //  ========== notifications collection APIs ========== //
+    //  ========== notifications collection APIs ========== //
 
     // API endpoint to get notifications for a specific email
     app.get('/v1/api/notifications/:email', async (req, res) => {
@@ -738,6 +739,13 @@ async function run() {
         res.status(500).send("Internal Server Error");
       }
     });
+
+    // post a user in notificationsCollection
+    app.post('/v1/api/notifications', async (req, res) => {
+      const assetInfo = req.body;
+      const result = await notificationsCollection.insertOne(assetInfo);
+      res.send(result)
+    })
 
     // update all notifications for a specific email
     app.patch('/v1/api/notifications/update-all-read/:email', async (req, res) => {
@@ -843,6 +851,41 @@ async function run() {
       res.send(result);
     });
 
+
+
+    //  ========== purchased collection APIs ========== //
+    //  ========== purchased collection APIs ========== //
+
+    // portfolio get data 
+    app.get('/v1/api/purchasedAssets', async (req, res) => {
+      const userEmail = req.query.email;
+      const query = {
+        assetBuyerEmail: userEmail
+      }
+      const result = await purchasedCollection.find(query).toArray()
+      res.send(result)
+    })
+
+    // buy related api starts from here
+    app.post('/v1/api/purchasedAssets/:remainingBalance', async (req, res) => {
+      const asset = req.body;
+      console.log(asset)
+      const remainingBalance = req.params.remainingBalance
+      // console.log(remainingBalance);
+
+      const filter = {
+        email: asset.assetBuyerEmail
+      };
+      const updatedDoc = {
+        $set: {
+          balance: remainingBalance
+        }
+      };
+      const result1 = await usersCollection.updateOne(filter, updatedDoc);
+      const result = await purchasedCollection.insertOne(asset)
+      res.send(result);
+    });
+
     // exchange api data
     app.put('/v1/api/exchangeAssets/:firstCoinId/:secondCoinId', async (req, res) => {
       const firstCoinId = req.params.firstCoinId
@@ -875,20 +918,17 @@ async function run() {
 
     })
 
-    // portfolio get data 
-    app.get('/v1/api/purchasedAssets', async (req, res) => {
-      const userEmail = req.query.email;
-      const query = {
-        assetBuyerEmail: userEmail
-      }
-      const result = await purchasedCollection.find(query).toArray()
+
+
+    //  ========== spotTrading collection APIs ========== //
+    //  ========== spotTrading collection APIs ========== //
+
+    app.get('/v1/api/spotTrading', async (req, res) => {
+      const result = await spotTradingCollection.find().toArray()
       res.send(result)
     })
 
-    //----Mahin--------
-
     //spot trading
-
     app.post('/v1/api/spotTrading', async (req, res) => {
       const asset = req.body;
       const result = await spotTradingCollection.insertOne(asset)
@@ -903,11 +943,6 @@ async function run() {
       const result = await spotTradingCollection.deleteOne(query);
       res.send(result);
     });
-
-    app.get('/v1/api/spotTrading', async (req, res) => {
-      const result = await spotTradingCollection.find().toArray()
-      res.send(result)
-    })
 
 
 
