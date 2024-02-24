@@ -662,15 +662,27 @@ async function run() {
 
     // get feedback
     app.get('/v1/api/feedback', async (req, res) => {
-      const email = req.query.email
-      const query = {
-        reviewerEmail: email
-      };
-      const result = await feedbackCollection.find(query).sort({
-        _id: -1
-      }).toArray();
-      res.send(result)
-    })
+      try {
+          const result = await feedbackCollection.find().sort({ _id: -1 }).toArray();
+          res.send(result);
+      } catch (error) {
+          console.error("Error fetching feedback:", error);
+          res.status(500).send("Error fetching feedback");
+      }
+  });
+  
+  // old code
+  
+    // app.get('/v1/api/feedback', async (req, res) => {
+    //   const email = req.query.email
+    //   const query = {
+    //     reviewerEmail: email
+    //   };
+    //   const result = await feedbackCollection.find(query).sort({
+    //     _id: -1
+    //   }).toArray();
+    //   res.send(result)
+    // })
 
     // send feedback
     app.post('/v1/api/feedback', async (req, res) => {
