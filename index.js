@@ -740,6 +740,8 @@ async function run() {
       }
     });
 
+    // notification seen method is called
+
     app.patch('/v1/api/notifications/:id',async(req, res)=>{
       const assetId = req.params.id;
       const query = {
@@ -753,6 +755,8 @@ async function run() {
       result = await notificationsCollection.updateOne(query, updatedDoc);
       res.send(result);
     });
+
+    //  notifications unseen method is called
     
     app.patch('/v1/api/markAsRead/:id',async(req, res)=>{
       const assetId = req.params.id;
@@ -767,6 +771,8 @@ async function run() {
       result = await notificationsCollection.updateOne(query, updatedDoc);
       res.send(result);
     });
+
+    // all notification marked as read method is called
 
     app.patch('/v1/api/markAllAsRead/:email',async(req, res)=>{
       const assetEmail = req.params.email;
