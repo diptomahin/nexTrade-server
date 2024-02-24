@@ -659,6 +659,7 @@ async function run() {
 
     //  ========== feedback collection APIs ========== //
     //  ========== feedback collection APIs ========== //
+// Julfiker Ali
 
     // get feedback
     app.get('/v1/api/feedback', async (req, res) => {
@@ -671,17 +672,6 @@ async function run() {
       }
   });
   
-    // app.get('/v1/api/feedback', async (req, res) => {
-    //   const email = req.query.email
-    //   const query = {
-    //     reviewerEmail: email
-    //   };
-    //   const result = await feedbackCollection.find(query).sort({
-    //     _id: -1
-    //   }).toArray();
-    //   res.send(result)
-    // })
-
     // send feedback
     app.post('/v1/api/feedback', async (req, res) => {
       const feedbackData = req.body;
