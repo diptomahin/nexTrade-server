@@ -60,8 +60,8 @@ async function run() {
     const depositWithdrawCollection = nexTrade.collection('depositWithdraw');
     const invoicesCollection = nexTrade.collection('invoices');
     const articleCollection = nexTrade.collection('articles');
-    const notificationsCollection = nexTrade.collection('notifications');
     const feedbackCollection = nexTrade.collection('feedbacks');
+    const notificationsCollection = nexTrade.collection('notifications');
 
 
     // stripe //
@@ -480,19 +480,23 @@ async function run() {
     // get total crypto count 
     app.get('/v1/api/totalCryptoCount', async (req, res) => {
       const count = await allCryptoCoinCollection.estimatedDocumentCount();
-      res.send({ count });
+      res.send({
+        count
+      });
     })
 
     // get total flat count 
     app.get('/v1/api/totalFlatCount', async (req, res) => {
       const count = await allFlatCoinCollection.estimatedDocumentCount();
-      res.send({ count });
+      res.send({
+        count
+      });
     })
 
     // get all crypto coin in market page
     app.get('/v1/api/allCryptoCoins', async (req, res) => {
       const page = parseInt(req.query.page);
-      const size = parseInt(req.query.size) 
+      const size = parseInt(req.query.size)
       const searchText = req.query.search;
       if (searchText) {
         const coins = await allCryptoCoinCollection.find({
@@ -666,7 +670,7 @@ async function run() {
       res.send(result);
     });
 
-    
+
 
 
     // Ariful's API's
@@ -720,76 +724,117 @@ async function run() {
     // get all notifications form data
 
     // API endpoint to get notifications for a specific email
-    app.get('/v1/api/notifications', async (req, res) => {
-      const email = req.query.email;
+    app.get('/v1/api/notifications/:email', async (req, res) => {
+      const email = req.params.email;
       const query = {
-        assetBuyerEmail: email
+        email: email
       };
 
       try {
-        const result = await notificationsCollection.find(query)
-          .sort({
-            _id: -1
-          })
-          .toArray();
+        const result = await notificationsCollection.find(query).toArray();
 
         res.send(result);
       } catch (error) {
-        console.error("Error retrieving notifications:", error);
         res.status(500).send("Internal Server Error");
       }
     });
 
-    // notification seen method is called
-
-    app.patch('/v1/api/notifications/:id',async(req, res)=>{
-      const assetId = req.params.id;
+    // update all notifications for a specific email
+    app.patch('/v1/api/notifications/update-all-read/:email', async (req, res) => {
+      const email = req.params.email;
       const query = {
-        _id: new ObjectId(assetId)
+        email: email
       };
-      const updatedDoc = {
+
+      const updateInfo = {
         $set: {
-          type: 'seen'
+          read: true
         }
-      };
-      result = await notificationsCollection.updateOne(query, updatedDoc);
-      res.send(result);
-    });
-
-    //  notifications unseen method is called
-    
-    app.patch('/v1/api/markAsRead/:id',async(req, res)=>{
-      const assetId = req.params.id;
-      const query = {
-        _id: new ObjectId(assetId)
-      };
-      const updatedDoc = {
-        $set: {
-          type: 'unseen'
-        }
-      };
-      result = await notificationsCollection.updateOne(query, updatedDoc);
-      res.send(result);
-    });
-
-    // all notification marked as read method is called
-
-    app.patch('/v1/api/markAllAsRead/:email',async(req, res)=>{
-      const assetEmail = req.params.email;
-      const query= {
-        assetBuyerEmail: assetEmail
       }
-      const updatedDoc = {
-        $set: {
-          type: 'seen'
-        }
+      try {
+        const result = await notificationsCollection.updateMany(query, updateInfo);
+
+        res.send(result);
+      } catch (error) {
+        res.status(500).send("Internal Server Error");
+      }
+    });
+
+    // update one notifications for a specific email
+    app.patch('/v1/api/notifications/update-one-read/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = {
+        _id: new ObjectId(id)
       };
-      result = await notificationsCollection.updateMany(query, updatedDoc);
+
+      const updateInfo = {
+        $set: {
+          read: true
+        }
+      }
+      try {
+        const result = await notificationsCollection.updateOne(query, updateInfo);
+
+        res.send(result);
+      } catch (error) {
+        res.status(500).send("Internal Server Error");
+      }
+    });
+
+    // update all notifications for a specific email
+    app.patch('/v1/api/notifications/update-all-unread/:email', async (req, res) => {
+      const email = req.params.email;
+      const query = {
+        email: email
+      };
+
+      const updateInfo = {
+        $set: {
+          read: false
+        }
+      }
+      try {
+        const result = await notificationsCollection.updateMany(query, updateInfo);
+
+        res.send(result);
+      } catch (error) {
+        res.status(500).send("Internal Server Error");
+      }
+    });
+
+    // update one notifications for a specific email
+    app.patch('/v1/api/notifications/update-one-unread/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = {
+        _id: new ObjectId(id)
+      };
+
+      const updateInfo = {
+        $set: {
+          read: false
+        }
+      }
+      try {
+        const result = await notificationsCollection.updateOne(query, updateInfo);
+
+        res.send(result);
+      } catch (error) {
+        res.status(500).send("Internal Server Error");
+      }
+    });
+
+    // Delete all from Notifications
+    app.delete('/v1/api/notifications/delete-all/:email', async (req, res) => {
+      const email = req.params.email;
+      const query = {
+        email: email
+      };
+      const result = await notificationsCollection.deleteMany(query);
       res.send(result);
     });
 
-    // Delete asset from single Notifications
-    app.delete('/v1/api/notifications/:id', async (req, res) => {
+    // delete specific notification
+    app.delete('/v1/api/notifications/delete-one/:id', async (req, res) => {
       const assetId = req.params.id;
       const query = {
         _id: new ObjectId(assetId)
@@ -798,23 +843,17 @@ async function run() {
       res.send(result);
     });
 
-    // Delete asset from All Notifications
-    app.delete('/v1/api/notifications/deleteAllNotifications/:email', async (req, res) => {
-      const assetEmail = req.params.email;
-      const query = {
-        assetBuyerEmail: assetEmail
-      };
-      const result = await notificationsCollection.deleteMany(query);
-      res.send(result);
-    });
-
     // exchange api data
     app.put('/v1/api/exchangeAssets/:firstCoinId/:secondCoinId', async (req, res) => {
       const firstCoinId = req.params.firstCoinId
       const secondCoinId = req.params.secondCoinId
 
-      const getFirstCoin = await purchasedCollection.find({_id: new ObjectId(firstCoinId)}).toArray() 
-      const getSecondCoin = await purchasedCollection.find({_id: new ObjectId(secondCoinId)}).toArray() 
+      const getFirstCoin = await purchasedCollection.find({
+        _id: new ObjectId(firstCoinId)
+      }).toArray()
+      const getSecondCoin = await purchasedCollection.find({
+        _id: new ObjectId(secondCoinId)
+      }).toArray()
 
       const calculateTotalInvestment = parseFloat(getFirstCoin[0].totalInvestment) + parseFloat(getSecondCoin[0].totalInvestment)
 
@@ -824,10 +863,14 @@ async function run() {
         }
       };
 
-      const result = await purchasedCollection.updateOne({_id: new ObjectId(secondCoinId)}, updatedDoc)
+      const result = await purchasedCollection.updateOne({
+        _id: new ObjectId(secondCoinId)
+      }, updatedDoc)
       res.send(result)
 
-      const result2 = await purchasedCollection.deleteOne({_id: new ObjectId(firstCoinId)})
+      const result2 = await purchasedCollection.deleteOne({
+        _id: new ObjectId(firstCoinId)
+      })
 
 
     })
