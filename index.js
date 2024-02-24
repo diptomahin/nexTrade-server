@@ -740,13 +740,71 @@ async function run() {
       }
     });
 
-    // Delete asset from Notifications
+    // notification seen method is called
+
+    app.patch('/v1/api/notifications/:id',async(req, res)=>{
+      const assetId = req.params.id;
+      const query = {
+        _id: new ObjectId(assetId)
+      };
+      const updatedDoc = {
+        $set: {
+          type: 'seen'
+        }
+      };
+      result = await notificationsCollection.updateOne(query, updatedDoc);
+      res.send(result);
+    });
+
+    //  notifications unseen method is called
+    
+    app.patch('/v1/api/markAsRead/:id',async(req, res)=>{
+      const assetId = req.params.id;
+      const query = {
+        _id: new ObjectId(assetId)
+      };
+      const updatedDoc = {
+        $set: {
+          type: 'unseen'
+        }
+      };
+      result = await notificationsCollection.updateOne(query, updatedDoc);
+      res.send(result);
+    });
+
+    // all notification marked as read method is called
+
+    app.patch('/v1/api/markAllAsRead/:email',async(req, res)=>{
+      const assetEmail = req.params.email;
+      const query= {
+        assetBuyerEmail: assetEmail
+      }
+      const updatedDoc = {
+        $set: {
+          type: 'seen'
+        }
+      };
+      result = await notificationsCollection.updateMany(query, updatedDoc);
+      res.send(result);
+    });
+
+    // Delete asset from single Notifications
     app.delete('/v1/api/notifications/:id', async (req, res) => {
       const assetId = req.params.id;
       const query = {
         _id: new ObjectId(assetId)
       };
       const result = await notificationsCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    // Delete asset from All Notifications
+    app.delete('/v1/api/notifications/deleteAllNotifications/:email', async (req, res) => {
+      const assetEmail = req.params.email;
+      const query = {
+        assetBuyerEmail: assetEmail
+      };
+      const result = await notificationsCollection.deleteMany(query);
       res.send(result);
     });
 
