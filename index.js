@@ -62,6 +62,7 @@ async function run() {
     const articleCollection = nexTrade.collection('articles');
     const feedbackCollection = nexTrade.collection('feedbacks');
     const notificationsCollection = nexTrade.collection('notifications');
+    const historyCollection = nexTrade.collection('history');
 
 
     //  ========== Stripe APIs ========== //
@@ -929,7 +930,6 @@ async function run() {
       res.send(result)
     })
 
-    //spot trading
     app.post('/v1/api/spotTrading', async (req, res) => {
       const asset = req.body;
       const result = await spotTradingCollection.insertOne(asset)
@@ -945,7 +945,19 @@ async function run() {
       res.send(result);
     });
 
+    //  ========== Trading history collection APIs ========== //
+    //  ========== Trading history collection APIs ========== //
 
+    app.get('/v1/api/history', async (req, res) => {
+      const result = await historyCollection.find().toArray()
+      res.send(result)
+    })
+
+    app.post('/v1/api/history', async (req, res) => {
+      const history = req.body;
+      const result = await historyCollection.insertOne(history)
+      res.send(result);
+    });
 
 
 
