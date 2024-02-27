@@ -63,6 +63,7 @@ async function run() {
     const feedbackCollection = nexTrade.collection('feedbacks');
     const notificationsCollection = nexTrade.collection('notifications');
     const historyCollection = nexTrade.collection('history');
+    const investmentHistoryCollection = nexTrade.collection('investmentHistory');
 
 
     //  ========== Stripe APIs ========== //
@@ -300,6 +301,7 @@ async function run() {
       const result4 = await watchListCollection.deleteMany({ email: userEmail })
       const result5 = await historyCollection.deleteMany({ Email: userEmail })
       const result6 = await historyCollection.deleteMany({ email: userEmail })
+      const result7 = await investmentHistoryCollection.deleteMany({ assetBuyerEmail: userEmail })
       res.send(result);
     })
 
@@ -966,6 +968,18 @@ async function run() {
     });
 
 
+    //  ========== Investment history collection APIs ========== //
+    //  ========== Investment history collection APIs ========== //
+    app.post('/v1/api/investmentHistory', async (req, res) => {
+      const history = req.body;
+      const result = await investmentHistoryCollection.insertOne(history)
+      res.send(result);
+    })
+
+    app.get('/v1/api/investmentHistory', async (req, res) => {
+      const result = await investmentHistoryCollection.find().sort({ _id: -1 }).toArray()
+      res.send(result)
+    })
 
 
     // Connect the client to the server	(optional starting in v4.7)
