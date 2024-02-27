@@ -286,14 +286,20 @@ async function run() {
       }
     });
 
-    // delete user account
-    app.delete('/v1/api/all-users/:userId', async (req, res) => {
+    // delete user account as well as all other data
+    app.delete('/v1/api/all-users/:userId/:userEmail', async (req, res) => {
       const userId = req.params.userId;
-      console.log(userId)
+      const userEmail = req.params.userEmail
+      // console.log(userId)
       const query = {
         _id: new ObjectId(userId)
       };
       const result = await usersCollection.deleteOne(query)
+      const result2 = await purchasedCollection.deleteMany({ assetBuyerEmail: userEmail })
+      const result3 = await watchListCollection.deleteMany({ email: userEmail })
+      const result4 = await watchListCollection.deleteMany({ email: userEmail })
+      const result5 = await historyCollection.deleteMany({ Email: userEmail })
+      const result6 = await historyCollection.deleteMany({ email: userEmail })
       res.send(result);
     })
 
