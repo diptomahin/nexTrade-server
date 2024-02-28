@@ -945,11 +945,8 @@ async function run() {
 
     // Delete all from Notifications
     app.delete('/v1/api/adminNotifications/delete-all', async (req, res) => {
-      const email = req.params.email;
-      const query = {
-        email: email
-      };
-      const result = await adminNotificationsCollection.deleteMany(query);
+      
+      const result = await adminNotificationsCollection.deleteMany({});
       res.send(result);
     });
 
@@ -964,27 +961,21 @@ async function run() {
     });
 
     // update  notifications for a specific 
-    app.patch(
-      "/v1/api/adminNotifications/update-all-read",
-      async (req, res) => {
-      
-        const updateInfo = {
-          $set: {
-            read: true,
-          },
-        };
-        try {
-          const result = await adminNotificationsCollection.updateMany(
-            
-            updateInfo
-          );
-
-          res.send(result);
-        } catch (error) {
-          res.status(500).send("Internal Server Error");
-        }
+    app.patch("/v1/api/adminNotifications/update-all-read", async (req, res) => {
+      const updateInfo = {
+        $set: {
+          read: true,
+        },
+      };
+      try {
+        const result = await adminNotificationsCollection.updateMany({}, updateInfo);
+        res.send(result);
+      } catch (error) {
+        res.status(500).send("Internal Server Error");
       }
-    );
+      
+    });
+    
 
     // update one adminNotifications for a specific email
     app.patch("/v1/api/adminNotifications/update-one-read/:id", async (req, res) => {
@@ -1022,7 +1013,7 @@ async function run() {
           },
         };
         try {
-          const result = await adminNotificationsCollection.updateMany(
+          const result = await adminNotificationsCollection.updateMany({},
             updateInfo
           );
 
