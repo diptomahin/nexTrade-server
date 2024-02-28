@@ -1055,11 +1055,70 @@ async function run() {
     //  ========== purchased collection APIs ========== //
 
     // portfolio get data
-    app.get("/v1/api/purchasedAssets", async (req, res) => {
-      const userEmail = req.query.email;
+    // app.get("/v1/api/purchasedAssets", async (req, res) => {
+    //   const userEmail = req.query.email;
+    //   const query = {
+    //     assetBuyerEmail: userEmail,
+    //   };
+    //   const result = await purchasedCollection.find(query).toArray();
+    //   res.send(result);
+    // });
+
+    app.get("/v1/api/purchasedAssets/:email", async (req, res) => {
+      const email = req.params.email;
+      const filter = req.query;
+
       const query = {
-        assetBuyerEmail: userEmail,
+        assetBuyerEmail: email,
       };
+
+      if (filter.search && filter.search !== "") {
+        if (!isNaN(filter.search)) {
+          // If search parameter is a number
+          const searchValue = parseFloat(filter.search);
+          query.$or = [
+            {
+              email: email,
+              assetName: searchValue,
+            },
+            {
+              email: email,
+              assetKey: searchValue,
+            },
+            {
+              email: email,
+              assetType: searchValue,
+            },
+            {
+              email: email,
+              assetBuyingPrice: searchValue,
+            },
+            {
+              email: email,
+              totalInvestment: searchValue,
+            },
+            
+          ];
+        } else {
+          
+          const searchRegex = {
+            $regex: filter.search,
+            $options: "i",
+          };
+
+          query.$or = [
+            {
+              email: email,
+              currency: searchRegex,
+            },
+            {
+              email: email,
+              action: searchRegex,
+            },
+          ];
+        }
+      }
+
       const result = await purchasedCollection.find(query).toArray();
       res.send(result);
     });
