@@ -927,7 +927,7 @@ async function run() {
           .sort({ _id: -1 })
           .toArray();
 
-        console.log("Backend Response:", result);
+        // console.log("Backend Response:", result);
         res.send(result);
       } catch (error) {
         console.error("Error fetching notifications:", error);
@@ -942,78 +942,85 @@ async function run() {
       res.send(result);
     });
 
-
     // Delete all from Notifications
-    app.delete('/v1/api/adminNotifications/delete-all', async (req, res) => {
-      
+    app.delete("/v1/api/adminNotifications/delete-all", async (req, res) => {
       const result = await adminNotificationsCollection.deleteMany({});
       res.send(result);
     });
 
     // delete specific notification
-    app.delete('/v1/api/adminNotifications/delete-one/:id', async (req, res) => {
-      const assetId = req.params.id;
-      const query = {
-        _id: new ObjectId(assetId)
-      };
-      const result = await adminNotificationsCollection.deleteOne(query);
-      res.send(result);
-    });
-
-    // update  notifications for a specific 
-    app.patch("/v1/api/adminNotifications/update-all-read", async (req, res) => {
-      const updateInfo = {
-        $set: {
-          read: true,
-        },
-      };
-      try {
-        const result = await adminNotificationsCollection.updateMany({}, updateInfo);
+    app.delete(
+      "/v1/api/adminNotifications/delete-one/:id",
+      async (req, res) => {
+        const assetId = req.params.id;
+        const query = {
+          _id: new ObjectId(assetId),
+        };
+        const result = await adminNotificationsCollection.deleteOne(query);
         res.send(result);
-      } catch (error) {
-        res.status(500).send("Internal Server Error");
       }
-      
-    });
-    
+    );
+
+    // update  notifications for a specific
+    app.patch(
+      "/v1/api/adminNotifications/update-all-read",
+      async (req, res) => {
+        const updateInfo = {
+          $set: {
+            read: true,
+          },
+        };
+        try {
+          const result = await adminNotificationsCollection.updateMany(
+            {},
+            updateInfo
+          );
+          res.send(result);
+        } catch (error) {
+          res.status(500).send("Internal Server Error");
+        }
+      }
+    );
 
     // update one adminNotifications for a specific email
-    app.patch("/v1/api/adminNotifications/update-one-read/:id", async (req, res) => {
-      const id = req.params.id;
-      const query = {
-        _id: new ObjectId(id),
-      };
+    app.patch(
+      "/v1/api/adminNotifications/update-one-read/:id",
+      async (req, res) => {
+        const id = req.params.id;
+        const query = {
+          _id: new ObjectId(id),
+        };
 
-      const updateInfo = {
-        $set: {
-          read: true,
-        },
-      };
-      try {
-        const result = await adminNotificationsCollection.updateOne(
-          query,
-          updateInfo
-        );
+        const updateInfo = {
+          $set: {
+            read: true,
+          },
+        };
+        try {
+          const result = await adminNotificationsCollection.updateOne(
+            query,
+            updateInfo
+          );
 
-        res.send(result);
-      } catch (error) {
-        res.status(500).send("Internal Server Error");
+          res.send(result);
+        } catch (error) {
+          res.status(500).send("Internal Server Error");
+        }
       }
-    });
+    );
 
-    // user update  all  adminNotifications for a specific 
+    // user update  all  adminNotifications for a specific
     app.patch(
       "/v1/api/adminNotifications/update-all-unread",
       async (req, res) => {
-        
-
         const updateInfo = {
           $set: {
             read: false,
           },
         };
         try {
-          const result = await adminNotificationsCollection.updateMany({},
+          const result = await adminNotificationsCollection.updateMany(
+            {},
             updateInfo
           );
 
@@ -1055,78 +1062,74 @@ async function run() {
     //  ========== purchased collection APIs ========== //
 
     // portfolio get data
-    // app.get("/v1/api/purchasedAssets", async (req, res) => {
-    //   const userEmail = req.query.email;
-    //   const query = {
-    //     assetBuyerEmail: userEmail,
-    //   };
-    //   const result = await purchasedCollection.find(query).toArray();
-    //   res.send(result);
-    // });
-
+    
     app.get("/v1/api/purchasedAssets/:email", async (req, res) => {
+      const page = parseInt(req.query.page);
+      const size = parseInt(req.query.size);
       const email = req.params.email;
       const filter = req.query;
-
+      console.log(email,filter)
       const query = {
         assetBuyerEmail: email,
       };
 
       if (filter.search && filter.search !== "") {
+
         if (!isNaN(filter.search)) {
           // If search parameter is a number
           const searchValue = parseFloat(filter.search);
           query.$or = [
-            {
-              email: email,
-              assetName: searchValue,
-            },
-            {
-              email: email,
-              assetKey: searchValue,
-            },
-            {
-              email: email,
-              assetType: searchValue,
-            },
-            {
-              email: email,
-              assetBuyingPrice: searchValue,
-            },
-            {
-              email: email,
-              totalInvestment: searchValue,
-            },
-            
+            { assetBuyerEmail: email, assetBuyingPrice: searchValue },
+            { assetBuyerEmail: email, totalInvestment: searchValue },
           ];
         } else {
-          
+          // If search parameter is not a number, treat it as a string
           const searchRegex = {
             $regex: filter.search,
             $options: "i",
           };
 
           query.$or = [
-            {
-              email: email,
-              currency: searchRegex,
-            },
-            {
-              email: email,
-              action: searchRegex,
-            },
+            { assetBuyerEmail: email, assetName: searchRegex },
+            { assetBuyerEmail: email, assetKey: searchRegex },
+            { assetBuyerEmail: email, assetType: searchRegex },
           ];
         }
       }
 
-      const result = await purchasedCollection.find(query).toArray();
+      const result = await purchasedCollection.find(query).skip(page * size)
+      .limit(size).toArray();
       res.send(result);
+    });
+
+    app.get("/v1/api/allCryptoCoins", async (req, res) => {
+      const page = parseInt(req.query.page);
+      const size = parseInt(req.query.size);
+      const searchText = req.query.search;
+      if (searchText) {
+        const coins = await allCryptoCoinCollection
+          .find({
+            name: {
+              $regex: searchText,
+              $options: "i",
+            },
+          })
+          .toArray(); // Perform case-insensitive search
+        res.send(coins);
+      } else {
+        const result = await allCryptoCoinCollection
+          .find()
+          .skip(page * size)
+          .limit(size)
+          .toArray();
+        res.send(result);
+      }
     });
 
     // buy related api starts from here
     app.post("/v1/api/purchasedAssets/:remainingBalance", async (req, res) => {
       const asset = req.body;
-      console.log(asset);
+      // console.log(asset);
       const remainingBalance = req.params.remainingBalance;
       // console.log(remainingBalance);
 
