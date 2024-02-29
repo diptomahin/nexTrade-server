@@ -37,6 +37,23 @@ async function run() {
     const nexTrade = client.db("nexTrade");
 
     // mongodb collections
+<<<<<<< HEAD
+    const usersCollection = nexTrade.collection('all-users');
+    const watchListCollection = nexTrade.collection('watchlist');
+    const purchasedCollection = nexTrade.collection('purchasedAssets');
+    const spotTradingCollection = nexTrade.collection('spotTrading');
+    const allCryptoCoinCollection = nexTrade.collection('allCryptoCoins');
+    const allFlatCoinCollection = nexTrade.collection('allFlatCoins');
+    const depositWithdrawCollection = nexTrade.collection('depositWithdraw');
+    const invoicesCollection = nexTrade.collection('invoices');
+    const articleCollection = nexTrade.collection('articles');
+    const feedbackCollection = nexTrade.collection('feedbacks');
+    const contactCollection = nexTrade.collection('contacts');
+    const notificationsCollection = nexTrade.collection('notifications');
+    const historyCollection = nexTrade.collection('history');
+    const investmentHistoryCollection = nexTrade.collection('investmentHistory');
+
+=======
     const usersCollection = nexTrade.collection("all-users");
     const watchListCollection = nexTrade.collection("watchlist");
     const purchasedCollection = nexTrade.collection("purchasedAssets");
@@ -53,6 +70,7 @@ async function run() {
     const historyCollection = nexTrade.collection("history");
     const investmentHistoryCollection =
       nexTrade.collection("investmentHistory");
+>>>>>>> 037f8812bcb7f8e33cac27b0d1233288ae1c1b3f
 
     //  ========== Stripe APIs ========== //
     //  ========== Stripe APIs ========== //
@@ -719,8 +737,37 @@ async function run() {
     app.post("/v1/api/feedback", async (req, res) => {
       const feedbackData = req.body;
       const result = await feedbackCollection.insertOne(feedbackData);
+<<<<<<< HEAD
+      res.send(result)
+    })
+
+    //  ========== contact collection APIs ========== //
+    //  ========== contact collection APIs ========== //
+    
+
+    // get feedback
+    app.get('/v1/api/contact', async (req, res) => {
+      try {
+        const result = await contactCollection.find().sort({ _id: -1 }).toArray();
+        res.send(result);
+      } catch (error) {
+        console.error("Error fetching contacts:", error);
+        res.status(500).send("Error fetching contact");
+      }
+    });
+
+    // send contact
+    app.post('/v1/api/contact', async (req, res) => {
+      const contactData = req.body;
+      const result = await contactCollection.insertOne(contactData);
+      res.send(result)
+    })
+
+
+=======
       res.send(result);
     });
+>>>>>>> 037f8812bcb7f8e33cac27b0d1233288ae1c1b3f
 
     //  ========== articles collection APIs ========== //
     //  ========== articles collection APIs ========== //
