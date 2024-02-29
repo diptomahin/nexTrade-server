@@ -48,11 +48,10 @@ async function run() {
     const articleCollection = nexTrade.collection("articles");
     const feedbackCollection = nexTrade.collection("feedbacks");
     const notificationsCollection = nexTrade.collection("notifications");
-    const adminNotificationsCollection =
-      nexTrade.collection("adminNotifications");
+    const contactCollection = nexTrade.collection('contacts');
+    const adminNotificationsCollection = nexTrade.collection("adminNotifications");
     const historyCollection = nexTrade.collection("history");
-    const investmentHistoryCollection =
-      nexTrade.collection("investmentHistory");
+    const investmentHistoryCollection = nexTrade.collection("investmentHistory");
 
     //  ========== Stripe APIs ========== //
     //  ========== Stripe APIs ========== //
@@ -722,6 +721,28 @@ async function run() {
       res.send(result);
     });
 
+    //  ========== contact collection APIs ========== //
+    //  ========== contact collection APIs ========== //
+
+
+    // get feedback
+    app.get('/v1/api/contact', async (req, res) => {
+      try {
+        const result = await contactCollection.find().sort({ _id: -1 }).toArray();
+        res.send(result);
+      } catch (error) {
+        console.error("Error fetching contacts:", error);
+        res.status(500).send("Error fetching contact");
+      }
+    });
+
+    // send contact
+    app.post('/v1/api/contact', async (req, res) => {
+      const contactData = req.body;
+      const result = await contactCollection.insertOne(contactData);
+      res.send(result)
+    })
+
     //  ========== articles collection APIs ========== //
     //  ========== articles collection APIs ========== //
 
@@ -943,7 +964,9 @@ async function run() {
     });
 
     // Delete all from Notifications
+
     app.delete("/v1/api/adminNotifications/delete-all", async (req, res) => {
+    
       const result = await adminNotificationsCollection.deleteMany({});
       res.send(result);
     });
@@ -959,6 +982,7 @@ async function run() {
         const result = await adminNotificationsCollection.deleteOne(query);
         res.send(result);
       }
+
     );
 
     // update  notifications for a specific
@@ -981,6 +1005,11 @@ async function run() {
         }
       }
     );
+
+
+    });
+
+
 
     // update one adminNotifications for a specific email
     app.patch(
@@ -1013,6 +1042,7 @@ async function run() {
     app.patch(
       "/v1/api/adminNotifications/update-all-unread",
       async (req, res) => {
+
         const updateInfo = {
           $set: {
             read: false,
@@ -1063,7 +1093,7 @@ async function run() {
 
     // portfolio get data
     
-    app.get("/v1/api/purchasedAssets/:email", async (req, res) => {
+   app.get("/v1/api/purchasedAssets/:email", async (req, res) => {
       const page = parseInt(req.query.page);
       const size = parseInt(req.query.size);
       const email = req.params.email;
@@ -1102,29 +1132,12 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/v1/api/allCryptoCoins", async (req, res) => {
-      const page = parseInt(req.query.page);
-      const size = parseInt(req.query.size);
-      const searchText = req.query.search;
-      if (searchText) {
-        const coins = await allCryptoCoinCollection
-          .find({
-            name: {
-              $regex: searchText,
-              $options: "i",
-            },
-          })
-          .toArray(); // Perform case-insensitive search
-        res.send(coins);
-      } else {
-        const result = await allCryptoCoinCollection
-          .find()
-          .skip(page * size)
-          .limit(size)
-          .toArray();
-        res.send(result);
-      }
+      const result = await purchasedCollection.find(query).skip(page * size)
+      .limit(size).toArray();
+      res.send(result);
     });
+
+
 
     // buy related api starts from here
     app.post("/v1/api/purchasedAssets/:remainingBalance", async (req, res) => {
@@ -1244,6 +1257,17 @@ async function run() {
         .toArray();
       res.send(result);
     });
+
+
+    // side portfolio get data 
+    app.get('/v1/api/sidePortfolio', async (req, res) => {
+      const userEmail = req.query.email;
+      const query = {
+        assetBuyerEmail: userEmail
+      }
+      const result = await purchasedCollection.find(query).toArray()
+      res.send(result)
+    })
 
     // Connect the client to the server	(optional starting in v4.7)
     // await client.connect();
