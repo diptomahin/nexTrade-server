@@ -373,7 +373,7 @@ async function run() {
         }
       }
 
-      const result = await depositWithdrawCollection.find(query).toArray();
+      const result = await depositWithdrawCollection.find(query).sort({ _id: -1 }).toArray();
       res.send(result);
     });
 
