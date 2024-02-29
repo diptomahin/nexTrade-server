@@ -37,23 +37,6 @@ async function run() {
     const nexTrade = client.db("nexTrade");
 
     // mongodb collections
-<<<<<<< HEAD
-    const usersCollection = nexTrade.collection('all-users');
-    const watchListCollection = nexTrade.collection('watchlist');
-    const purchasedCollection = nexTrade.collection('purchasedAssets');
-    const spotTradingCollection = nexTrade.collection('spotTrading');
-    const allCryptoCoinCollection = nexTrade.collection('allCryptoCoins');
-    const allFlatCoinCollection = nexTrade.collection('allFlatCoins');
-    const depositWithdrawCollection = nexTrade.collection('depositWithdraw');
-    const invoicesCollection = nexTrade.collection('invoices');
-    const articleCollection = nexTrade.collection('articles');
-    const feedbackCollection = nexTrade.collection('feedbacks');
-    const contactCollection = nexTrade.collection('contacts');
-    const notificationsCollection = nexTrade.collection('notifications');
-    const historyCollection = nexTrade.collection('history');
-    const investmentHistoryCollection = nexTrade.collection('investmentHistory');
-
-=======
     const usersCollection = nexTrade.collection("all-users");
     const watchListCollection = nexTrade.collection("watchlist");
     const purchasedCollection = nexTrade.collection("purchasedAssets");
@@ -65,12 +48,10 @@ async function run() {
     const articleCollection = nexTrade.collection("articles");
     const feedbackCollection = nexTrade.collection("feedbacks");
     const notificationsCollection = nexTrade.collection("notifications");
-    const adminNotificationsCollection =
-      nexTrade.collection("adminNotifications");
+    const contactCollection = nexTrade.collection('contacts');
+    const adminNotificationsCollection = nexTrade.collection("adminNotifications");
     const historyCollection = nexTrade.collection("history");
-    const investmentHistoryCollection =
-      nexTrade.collection("investmentHistory");
->>>>>>> 037f8812bcb7f8e33cac27b0d1233288ae1c1b3f
+    const investmentHistoryCollection = nexTrade.collection("investmentHistory");
 
     //  ========== Stripe APIs ========== //
     //  ========== Stripe APIs ========== //
@@ -737,13 +718,12 @@ async function run() {
     app.post("/v1/api/feedback", async (req, res) => {
       const feedbackData = req.body;
       const result = await feedbackCollection.insertOne(feedbackData);
-<<<<<<< HEAD
-      res.send(result)
-    })
+      res.send(result);
+    });
 
     //  ========== contact collection APIs ========== //
     //  ========== contact collection APIs ========== //
-    
+
 
     // get feedback
     app.get('/v1/api/contact', async (req, res) => {
@@ -762,12 +742,6 @@ async function run() {
       const result = await contactCollection.insertOne(contactData);
       res.send(result)
     })
-
-
-=======
-      res.send(result);
-    });
->>>>>>> 037f8812bcb7f8e33cac27b0d1233288ae1c1b3f
 
     //  ========== articles collection APIs ========== //
     //  ========== articles collection APIs ========== //
@@ -992,7 +966,7 @@ async function run() {
 
     // Delete all from Notifications
     app.delete('/v1/api/adminNotifications/delete-all', async (req, res) => {
-      
+
       const result = await adminNotificationsCollection.deleteMany({});
       res.send(result);
     });
@@ -1020,9 +994,9 @@ async function run() {
       } catch (error) {
         res.status(500).send("Internal Server Error");
       }
-      
+
     });
-    
+
 
     // update one adminNotifications for a specific email
     app.patch("/v1/api/adminNotifications/update-one-read/:id", async (req, res) => {
@@ -1052,7 +1026,7 @@ async function run() {
     app.patch(
       "/v1/api/adminNotifications/update-all-unread",
       async (req, res) => {
-        
+
 
         const updateInfo = {
           $set: {
@@ -1144,10 +1118,10 @@ async function run() {
               email: email,
               totalInvestment: searchValue,
             },
-            
+
           ];
         } else {
-          
+
           const searchRegex = {
             $regex: filter.search,
             $options: "i",
