@@ -1007,7 +1007,6 @@ async function run() {
     );
 
 
-    });
 
 
 
@@ -1132,10 +1131,6 @@ async function run() {
       res.send(result);
     });
 
-      const result = await purchasedCollection.find(query).skip(page * size)
-      .limit(size).toArray();
-      res.send(result);
-    });
 
 
 
