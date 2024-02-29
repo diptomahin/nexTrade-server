@@ -1242,6 +1242,17 @@ async function run() {
       res.send(result);
     });
 
+
+    // side portfolio get data 
+    app.get('/v1/api/sidePortfolio', async (req, res) => {
+      const userEmail = req.query.email;
+      const query = {
+        assetBuyerEmail: userEmail
+      }
+      const result = await purchasedCollection.find(query).toArray()
+      res.send(result)
+    })
+
     // Connect the client to the server	(optional starting in v4.7)
     // await client.connect();
     // Send a ping to confirm a successful connection
