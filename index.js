@@ -61,6 +61,7 @@ async function run() {
     const invoicesCollection = nexTrade.collection('invoices');
     const articleCollection = nexTrade.collection('articles');
     const feedbackCollection = nexTrade.collection('feedbacks');
+    const contactCollection = nexTrade.collection('contacts');
     const notificationsCollection = nexTrade.collection('notifications');
     const historyCollection = nexTrade.collection('history');
     const investmentHistoryCollection = nexTrade.collection('investmentHistory');
@@ -684,6 +685,28 @@ async function run() {
     app.post('/v1/api/feedback', async (req, res) => {
       const feedbackData = req.body;
       const result = await feedbackCollection.insertOne(feedbackData);
+      res.send(result)
+    })
+
+    //  ========== contact collection APIs ========== //
+    //  ========== contact collection APIs ========== //
+    
+
+    // get feedback
+    app.get('/v1/api/contact', async (req, res) => {
+      try {
+        const result = await contactCollection.find().sort({ _id: -1 }).toArray();
+        res.send(result);
+      } catch (error) {
+        console.error("Error fetching contacts:", error);
+        res.status(500).send("Error fetching contact");
+      }
+    });
+
+    // send contact
+    app.post('/v1/api/contact', async (req, res) => {
+      const contactData = req.body;
+      const result = await contactCollection.insertOne(contactData);
       res.send(result)
     })
 
