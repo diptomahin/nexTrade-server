@@ -52,6 +52,7 @@ async function run() {
     const adminNotificationsCollection = nexTrade.collection("adminNotifications");
     const historyCollection = nexTrade.collection("history");
     const investmentHistoryCollection = nexTrade.collection("investmentHistory");
+    const profitLossCollection = nexTrade.collection("profitLoss");
 
     //  ========== Stripe APIs ========== //
     //  ========== Stripe APIs ========== //
@@ -1092,13 +1093,18 @@ async function run() {
 
     // portfolio get data
 
-    app.get("/v1/api/totalPurchasedAssets/:email", async (req, res) =>{
-      const email = req.params.email;
-      const query = {
-        assetBuyerEmail: email,
-      };
-      const result = await purchasedCollection.find(query).toArray();
+    app.post("/v1/api/allSoldCoin/:sellCoinId/:newBalance/:email",async (req, res) => {
+      const useEmail = req.params.email; 
+      const sellingData = req.body
+      const sellCoinId = req.params.sellCoinId
+      const newBalance = req.params.newBalance
+      const query =  {_id: new ObjectId(sellCoinId)}
+      const filter = {email: useEmail};
+      const result = await profitLossCollection.insertOne(sellingData);
       res.send(result);
+      const result2 = await usersCollection.updateOne(filter,{$set: { balance: newBalance  }} )
+      const result1 = await purchasedCollection.deleteOne(query);
+      
     })
     
    app.get("/v1/api/purchasedAssets/:email", async (req, res) => {
