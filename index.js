@@ -1107,6 +1107,13 @@ async function run() {
       
     })
     
+    app.get("/v1/api/totalAssetCount", async (req, res) => {
+      const count = await purchasedCollection.estimatedDocumentCount();
+      res.send({
+        count,
+      });
+    });
+
    app.get("/v1/api/purchasedAssets/:email", async (req, res) => {
       const page = parseInt(req.query.page);
       const size = parseInt(req.query.size);
