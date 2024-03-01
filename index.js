@@ -1091,6 +1091,15 @@ async function run() {
     //  ========== purchased collection APIs ========== //
 
     // portfolio get data
+
+    app.get("/v1/api/totalPurchasedAssets/:email", async (req, res) =>{
+      const email = req.params.email;
+      const query = {
+        assetBuyerEmail: email,
+      };
+      const result = await purchasedCollection.find(query).toArray();
+      res.send(result);
+    })
     
    app.get("/v1/api/purchasedAssets/:email", async (req, res) => {
       const page = parseInt(req.query.page);
