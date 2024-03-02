@@ -48,10 +48,12 @@ async function run() {
     const articleCollection = nexTrade.collection("articles");
     const feedbackCollection = nexTrade.collection("feedbacks");
     const notificationsCollection = nexTrade.collection("notifications");
-    const contactCollection = nexTrade.collection('contacts');
-    const adminNotificationsCollection = nexTrade.collection("adminNotifications");
+    const contactCollection = nexTrade.collection("contacts");
+    const adminNotificationsCollection =
+      nexTrade.collection("adminNotifications");
     const historyCollection = nexTrade.collection("history");
-    const investmentHistoryCollection = nexTrade.collection("investmentHistory");
+    const investmentHistoryCollection =
+      nexTrade.collection("investmentHistory");
     const profitLossCollection = nexTrade.collection("profitLoss");
 
     //  ========== Stripe APIs ========== //
@@ -374,7 +376,10 @@ async function run() {
         }
       }
 
-      const result = await depositWithdrawCollection.find(query).sort({ _id: -1 }).toArray();
+      const result = await depositWithdrawCollection
+        .find(query)
+        .sort({ _id: -1 })
+        .toArray();
       res.send(result);
     });
 
@@ -725,11 +730,13 @@ async function run() {
     //  ========== contact collection APIs ========== //
     //  ========== contact collection APIs ========== //
 
-
     // get feedback
-    app.get('/v1/api/contact', async (req, res) => {
+    app.get("/v1/api/contact", async (req, res) => {
       try {
-        const result = await contactCollection.find().sort({ _id: -1 }).toArray();
+        const result = await contactCollection
+          .find()
+          .sort({ _id: -1 })
+          .toArray();
         res.send(result);
       } catch (error) {
         console.error("Error fetching contacts:", error);
@@ -738,11 +745,11 @@ async function run() {
     });
 
     // send contact
-    app.post('/v1/api/contact', async (req, res) => {
+    app.post("/v1/api/contact", async (req, res) => {
       const contactData = req.body;
       const result = await contactCollection.insertOne(contactData);
-      res.send(result)
-    })
+      res.send(result);
+    });
 
     //  ========== articles collection APIs ========== //
     //  ========== articles collection APIs ========== //
@@ -967,7 +974,6 @@ async function run() {
     // Delete all from Notifications
 
     app.delete("/v1/api/adminNotifications/delete-all", async (req, res) => {
-    
       const result = await adminNotificationsCollection.deleteMany({});
       res.send(result);
     });
@@ -983,7 +989,6 @@ async function run() {
         const result = await adminNotificationsCollection.deleteOne(query);
         res.send(result);
       }
-
     );
 
     // update  notifications for a specific
@@ -1006,10 +1011,6 @@ async function run() {
         }
       }
     );
-
-
-
-
 
     // update one adminNotifications for a specific email
     app.patch(
@@ -1042,7 +1043,6 @@ async function run() {
     app.patch(
       "/v1/api/adminNotifications/update-all-unread",
       async (req, res) => {
-
         const updateInfo = {
           $set: {
             read: false,
@@ -1093,20 +1093,26 @@ async function run() {
 
     // portfolio get data
 
-    app.post("/v1/api/allSoldCoin/:sellCoinId/:newBalance/:email",async (req, res) => {
-      const useEmail = req.params.email; 
-      const sellingData = req.body
-      const sellCoinId = req.params.sellCoinId
-      const newBalance = req.params.newBalance
-      const query =  {_id: new ObjectId(sellCoinId)}
-      const filter = {email: useEmail};
-      const result = await profitLossCollection.insertOne(sellingData);
-      res.send(result);
-      const result2 = await usersCollection.updateOne(filter,{$set: { balance: newBalance  }} )
-      const result1 = await purchasedCollection.deleteOne(query);
-      
-    })
-    
+    app.put(
+      "/v1/api/allSoldCoin/:sellCoinId/:remainingBalance/:email",
+      async (req, res) => {
+        const useEmail = req.params.email;
+        const sellingData = req.body;
+        const { totalInvestment, sellCoinProfit, sellCoinLoss } = sellingData;
+        const sellCoinId = req.params.sellCoinId;
+        const remainingBalance = req.params.remainingBalance;
+        const newBalance = parseFloat(totalInvestment)+parseFloat(sellCoinProfit)+parseFloat(sellCoinLoss)+parseFloat(remainingBalance);
+        const query = { _id: new ObjectId(sellCoinId) };
+        const filter = { email: useEmail };
+        const result = await profitLossCollection.insertOne(sellingData);
+        const result2 = await usersCollection.updateOne(filter, {
+          $set: { balance: newBalance },
+        });
+        const result1 = await purchasedCollection.deleteOne(query);
+        res.send(result2);
+      }
+    );
+
     app.get("/v1/api/totalAssetCount", async (req, res) => {
       const count = await purchasedCollection.estimatedDocumentCount();
       res.send({
@@ -1114,18 +1120,16 @@ async function run() {
       });
     });
 
-   app.get("/v1/api/purchasedAssets/:email", async (req, res) => {
+    app.get("/v1/api/purchasedAssets/:email", async (req, res) => {
       const page = parseInt(req.query.page);
       const size = parseInt(req.query.size);
       const email = req.params.email;
       const filter = req.query;
-      console.log(email,filter)
       const query = {
         assetBuyerEmail: email,
       };
 
       if (filter.search && filter.search !== "") {
-
         if (!isNaN(filter.search)) {
           // If search parameter is a number
           const searchValue = parseFloat(filter.search);
@@ -1148,13 +1152,13 @@ async function run() {
         }
       }
 
-      const result = await purchasedCollection.find(query).skip(page * size)
-      .limit(size).toArray();
+      const result = await purchasedCollection
+        .find(query)
+        .skip(page * size)
+        .limit(size)
+        .toArray();
       res.send(result);
     });
-
-
-
 
     // buy related api starts from here
     app.post("/v1/api/purchasedAssets/:remainingBalance", async (req, res) => {
@@ -1275,16 +1279,15 @@ async function run() {
       res.send(result);
     });
 
-
-    // side portfolio get data 
-    app.get('/v1/api/sidePortfolio', async (req, res) => {
+    // side portfolio get data
+    app.get("/v1/api/sidePortfolio", async (req, res) => {
       const userEmail = req.query.email;
       const query = {
-        assetBuyerEmail: userEmail
-      }
-      const result = await purchasedCollection.find(query).toArray()
-      res.send(result)
-    })
+        assetBuyerEmail: userEmail,
+      };
+      const result = await purchasedCollection.find(query).toArray();
+      res.send(result);
+    });
 
     // Connect the client to the server	(optional starting in v4.7)
     // await client.connect();
