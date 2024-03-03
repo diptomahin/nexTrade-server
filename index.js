@@ -1168,6 +1168,9 @@ app.get("/v1/api/profitLoss", async (req, res) => {
 
       const result = await purchasedCollection
         .find(query)
+        .sort({
+          _id: -1,
+        })
         .skip(page * size)
         .limit(size)
         .toArray();
