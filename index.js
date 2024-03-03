@@ -1112,6 +1112,20 @@ async function run() {
         res.send(result2);
       }
     );
+// get Profit and loss info for individual user
+app.get("/v1/api/profitLoss", async (req, res) => {
+  const email = req.query.email;
+  const query = {
+    email: email,
+  };
+  const result = await profitLossCollection
+    .find(query)
+    .sort({
+      _id: -1,
+    })
+    .toArray();
+  res.send(result);
+});
 
     app.get("/v1/api/totalAssetCount", async (req, res) => {
       const count = await purchasedCollection.estimatedDocumentCount();
