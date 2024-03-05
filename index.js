@@ -57,7 +57,6 @@ async function run() {
     const profitLossCollection = nexTrade.collection("profitLoss");
 
     //  ========== Stripe APIs ========== //
-    //  ========== Stripe APIs ========== //
 
     // checkout api
     app.post("/v1/api/checkout-session", async (req, res) => {
@@ -169,14 +168,13 @@ async function run() {
           clientSecret: paymentIntent.client_secret,
         });
       } catch (error) {
-        console.error("Error creating payment intent:", error);
+        // console.error("Error creating payment intent:", error);
         res.status(500).send({
           error: "Error creating payment intent.",
         });
       }
     });
 
-    //  ========== user collection APIs ========== //
     //  ========== user collection APIs ========== //
 
     // get all user
@@ -229,7 +227,7 @@ async function run() {
     // put method
     app.put("/v1/api/update-user/:email", async (req, res) => {
       const email = req.params.email;
-      console.log(email);
+      // console.log(email);
       const userDetails = req.body;
       const query = {
         email: email,
@@ -307,7 +305,6 @@ async function run() {
       res.send(result);
     });
 
-    //  ========== depositWithdraw collection APIs ========== //
     //  ========== depositWithdraw collection APIs ========== //
 
     // get all deposit and withdraw data
@@ -464,7 +461,7 @@ async function run() {
 
       } catch (error) {
         // If an unexpected error occurs, return a general error response
-        console.error("Error:", error);
+        // console.error("Error:", error);
         return res.status(500).json({
           error: "Failed to deposit. Refresh & try again",
         });
@@ -524,7 +521,7 @@ async function run() {
         }
       } catch (error) {
         // If an unexpected error occurs, return a general error response
-        console.error("Error:", error);
+        // console.error("Error:", error);
         res.status(500).json({
           error: "Internal server error",
         });
@@ -559,7 +556,6 @@ async function run() {
       }
     );
 
-    //  ========== allCryptoCoins collection APIs ========== //
     //  ========== allCryptoCoins collection APIs ========== //
 
     // get all crypto coin in manage coin page
@@ -636,7 +632,6 @@ async function run() {
     });
 
     //  ========== allFlatCoin collection APIs ========== //
-    //  ========== allFlatCoin collection APIs ========== //
 
     // get all flat coin in manage coin page
     app.get("/v1/api/manageAllFlatCoins", async (req, res) => {
@@ -709,7 +704,6 @@ async function run() {
     });
 
     //  ========== watchList collection APIs ========== //
-    //  ========== watchList collection APIs ========== //
 
     // get watchilst info for individual user
     app.get("/v1/api/watchlist", async (req, res) => {
@@ -744,7 +738,6 @@ async function run() {
     });
 
     //  ========== feedback collection APIs ========== //
-    //  ========== feedback collection APIs ========== //
 
     // get feedback
     app.get("/v1/api/feedback", async (req, res) => {
@@ -755,7 +748,7 @@ async function run() {
           .toArray();
         res.send(result);
       } catch (error) {
-        console.error("Error fetching feedback:", error);
+        // console.error("Error fetching feedback:", error);
         res.status(500).send("Error fetching feedback");
       }
     });
@@ -768,7 +761,6 @@ async function run() {
     });
 
     //  ========== contact collection APIs ========== //
-    //  ========== contact collection APIs ========== //
 
     // get feedback
     app.get("/v1/api/contact", async (req, res) => {
@@ -779,7 +771,7 @@ async function run() {
           .toArray();
         res.send(result);
       } catch (error) {
-        console.error("Error fetching contacts:", error);
+        // console.error("Error fetching contacts:", error);
         res.status(500).send("Error fetching contact");
       }
     });
@@ -791,7 +783,6 @@ async function run() {
       res.send(result);
     });
 
-    //  ========== articles collection APIs ========== //
     //  ========== articles collection APIs ========== //
 
     // Read articles API's
@@ -817,6 +808,7 @@ async function run() {
       res.send(result);
     });
 
+    // update viewCount API's
     app.patch("/v1/api/articles/viewCount/:id", async (req, res) => {
       const id = req.params.id;
       const query = {
@@ -831,6 +823,7 @@ async function run() {
       res.send(result);
     });
 
+    // comment update API's
     app.patch("/v1/api/articles/comments/:id", async (req, res) => {
       const id = req.params.id;
       const query = {
@@ -843,7 +836,6 @@ async function run() {
       res.send(result);
     })
 
-    //  ========== notifications collection APIs ========== //
     //  ========== notifications collection APIs ========== //
 
     // API endpoint to get notifications for a specific email
@@ -1011,7 +1003,7 @@ async function run() {
         // console.log("Backend Response:", result);
         res.send(result);
       } catch (error) {
-        console.error("Error fetching notifications:", error);
+        // console.error("Error fetching notifications:", error);
         res.status(500).send({ error: "Internal Server Error" });
       }
     });
@@ -1140,7 +1132,6 @@ async function run() {
       }
     );
 
-    //  ========== purchased collection APIs ========== //
     //  ========== purchased collection APIs ========== //
 
     // portfolio get data
@@ -1300,7 +1291,6 @@ async function run() {
     );
 
     //  ========== spotTrading collection APIs ========== //
-    //  ========== spotTrading collection APIs ========== //
 
     app.get("/v1/api/spotTrading", async (req, res) => {
       const result = await spotTradingCollection.find().toArray();
@@ -1323,7 +1313,6 @@ async function run() {
     });
 
     //  ========== Trading history collection APIs ========== //
-    //  ========== Trading history collection APIs ========== //
 
     app.get("/v1/api/history", async (req, res) => {
       const result = await historyCollection.find().toArray();
@@ -1337,7 +1326,7 @@ async function run() {
     });
 
     //  ========== Investment history collection APIs ========== //
-    //  ========== Investment history collection APIs ========== //
+
     app.post("/v1/api/investmentHistory", async (req, res) => {
       const history = req.body;
       const result = await investmentHistoryCollection.insertOne(history);
