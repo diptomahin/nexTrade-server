@@ -174,7 +174,7 @@ async function run() {
         });
       }
     });
-    
+
     //  ========== user collection APIs ========== //
 
     // get all user
@@ -305,7 +305,6 @@ async function run() {
       res.send(result);
     });
 
-    //  ========== depositWithdraw collection APIs ========== //
     //  ========== depositWithdraw collection APIs ========== //
 
     // get all deposit and withdraw data
@@ -557,7 +556,6 @@ async function run() {
       }
     );
 
-    //  ========== allCryptoCoins collection APIs ========== //
     //  ========== allCryptoCoins collection APIs ========== //
 
     // get all crypto coin in manage coin page
