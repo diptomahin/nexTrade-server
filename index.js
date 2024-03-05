@@ -632,7 +632,6 @@ async function run() {
     });
 
     //  ========== allFlatCoin collection APIs ========== //
-    //  ========== allFlatCoin collection APIs ========== //
 
     // get all flat coin in manage coin page
     app.get("/v1/api/manageAllFlatCoins", async (req, res) => {
@@ -705,7 +704,6 @@ async function run() {
     });
 
     //  ========== watchList collection APIs ========== //
-    //  ========== watchList collection APIs ========== //
 
     // get watchilst info for individual user
     app.get("/v1/api/watchlist", async (req, res) => {
@@ -740,7 +738,6 @@ async function run() {
     });
 
     //  ========== feedback collection APIs ========== //
-    //  ========== feedback collection APIs ========== //
 
     // get feedback
     app.get("/v1/api/feedback", async (req, res) => {
@@ -764,7 +761,6 @@ async function run() {
     });
 
     //  ========== contact collection APIs ========== //
-    //  ========== contact collection APIs ========== //
 
     // get feedback
     app.get("/v1/api/contact", async (req, res) => {
@@ -787,7 +783,6 @@ async function run() {
       res.send(result);
     });
 
-    //  ========== articles collection APIs ========== //
     //  ========== articles collection APIs ========== //
 
     // Read articles API's
@@ -839,7 +834,6 @@ async function run() {
       res.send(result);
     })
 
-    //  ========== notifications collection APIs ========== //
     //  ========== notifications collection APIs ========== //
 
     // API endpoint to get notifications for a specific email
@@ -1137,7 +1131,6 @@ async function run() {
     );
 
     //  ========== purchased collection APIs ========== //
-    //  ========== purchased collection APIs ========== //
 
     // portfolio get data
 
@@ -1296,7 +1289,6 @@ async function run() {
     );
 
     //  ========== spotTrading collection APIs ========== //
-    //  ========== spotTrading collection APIs ========== //
 
     app.get("/v1/api/spotTrading", async (req, res) => {
       const result = await spotTradingCollection.find().toArray();
@@ -1319,7 +1311,6 @@ async function run() {
     });
 
     //  ========== Trading history collection APIs ========== //
-    //  ========== Trading history collection APIs ========== //
 
     app.get("/v1/api/history", async (req, res) => {
       const result = await historyCollection.find().toArray();
@@ -1333,7 +1324,7 @@ async function run() {
     });
 
     //  ========== Investment history collection APIs ========== //
-    //  ========== Investment history collection APIs ========== //
+    
     app.post("/v1/api/investmentHistory", async (req, res) => {
       const history = req.body;
       const result = await investmentHistoryCollection.insertOne(history);
