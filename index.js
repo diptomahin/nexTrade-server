@@ -414,7 +414,7 @@ async function run() {
             status: "Complete",
           };
         }
-        
+
         if (isPaymentSelected === "bank") {
           depositData = {
             email: userEmail,
@@ -432,7 +432,7 @@ async function run() {
 
         const depositResult = await depositWithdrawCollection.insertOne(depositData);
 
-        if(depositResult.insertedId){
+        if (depositResult.insertedId) {
           const userData = await usersCollection.findOne(query);
           const depositInfo = {
             $set: {
@@ -447,7 +447,7 @@ async function run() {
             depositInfo
           );
           if (balanceResult.modifiedCount > 0) {
-         
+
             return res.send(balanceResult);
           } else {
             // If balance is not updated, return an error response
@@ -455,7 +455,7 @@ async function run() {
               error: "Failed to deposit. Refresh & try again",
             });
           }
-        }else {
+        } else {
           // If balance is not updated, return an error response
           return res.status(500).json({
             error: "Failed to deposit. Refresh & try again",
@@ -830,6 +830,18 @@ async function run() {
       const result = await articleCollection.updateOne(query, update);
       res.send(result);
     });
+
+    app.patch("/v1/api/articles/comments/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = {
+        _id: new ObjectId(id),
+      };
+      const updateDoc = {
+        $set: { comment: req.body.commentTextValue }
+      }
+      const result = await articleCollection.updateOne(query, updateDoc);
+      res.send(result);
+    })
 
     //  ========== notifications collection APIs ========== //
     //  ========== notifications collection APIs ========== //
