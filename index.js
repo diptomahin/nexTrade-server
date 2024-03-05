@@ -168,7 +168,7 @@ async function run() {
           clientSecret: paymentIntent.client_secret,
         });
       } catch (error) {
-        console.error("Error creating payment intent:", error);
+        // console.error("Error creating payment intent:", error);
         res.status(500).send({
           error: "Error creating payment intent.",
         });
@@ -227,7 +227,7 @@ async function run() {
     // put method
     app.put("/v1/api/update-user/:email", async (req, res) => {
       const email = req.params.email;
-      console.log(email);
+      // console.log(email);
       const userDetails = req.body;
       const query = {
         email: email,
@@ -461,7 +461,7 @@ async function run() {
 
       } catch (error) {
         // If an unexpected error occurs, return a general error response
-        console.error("Error:", error);
+        // console.error("Error:", error);
         return res.status(500).json({
           error: "Failed to deposit. Refresh & try again",
         });
@@ -521,7 +521,7 @@ async function run() {
         }
       } catch (error) {
         // If an unexpected error occurs, return a general error response
-        console.error("Error:", error);
+        // console.error("Error:", error);
         res.status(500).json({
           error: "Internal server error",
         });
@@ -748,7 +748,7 @@ async function run() {
           .toArray();
         res.send(result);
       } catch (error) {
-        console.error("Error fetching feedback:", error);
+        // console.error("Error fetching feedback:", error);
         res.status(500).send("Error fetching feedback");
       }
     });
@@ -771,7 +771,7 @@ async function run() {
           .toArray();
         res.send(result);
       } catch (error) {
-        console.error("Error fetching contacts:", error);
+        // console.error("Error fetching contacts:", error);
         res.status(500).send("Error fetching contact");
       }
     });
@@ -808,7 +808,7 @@ async function run() {
       res.send(result);
     });
 
-     // update viewCount API's
+    // update viewCount API's
     app.patch("/v1/api/articles/viewCount/:id", async (req, res) => {
       const id = req.params.id;
       const query = {
@@ -1003,7 +1003,7 @@ async function run() {
         // console.log("Backend Response:", result);
         res.send(result);
       } catch (error) {
-        console.error("Error fetching notifications:", error);
+        // console.error("Error fetching notifications:", error);
         res.status(500).send({ error: "Internal Server Error" });
       }
     });
