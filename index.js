@@ -468,62 +468,94 @@ async function run() {
       }
     });
 
-    //  post withdraw data
-    app.post("/v1/api/withdraw/:email", async (req, res) => {
+
+    // post withdrawal data
+    app.post("/v1/api/withdrawal/:email", async (req, res) => {
       try {
         const userEmail = req.params.email;
-        const withdrawData = req.body;
+        const data = req.body.data;
+        const date = req.body.date;
+        const isPaymentSelected = req.body.isPaymentSelected;
+
         const query = {
           email: userEmail,
         };
-        const userData = await usersCollection.findOne(query);
 
-        if (!userData) {
-          // If user data is not found, return an error response
+        if (!data || !isPaymentSelected || !date) {
           return res.status(404).json({
-            error: "User not found",
+            error: "Data not found",
           });
         }
 
-        const newBalance =
-          parseFloat(userData.balance) - parseFloat(withdrawData.amount);
+        let withdrawalData = null;
 
-        if (newBalance < 0) {
-          // If withdrawal amount exceeds balance, return an error response
-          return res.status(400).json({
-            error: "Insufficient balance",
-          });
+        if (isPaymentSelected === "card") {
+          withdrawalData = {
+            email: userEmail,
+            action: "Withdrawal",
+            amount: parseFloat(data?.amount),
+            method: "Card",
+            holder: data?.cardHolder,
+            card: `${data.cardNumber.slice(0, 4)}****${data.cardNumber.slice(-4)}`,
+            expired: data?.expiredDate,
+            currency: data?.currency,
+            date: date,
+            status: "Complete",
+          };
+        }
+        
+        if (isPaymentSelected === "bank") {
+          withdrawalData = {
+            email: userEmail,
+            action: "Withdrawal",
+            amount: parseFloat(data?.amount),
+            method: "Bank",
+            holder: data?.accountHolder,
+            bank: `${data.accountNumber.slice(0, 3)}****${data.accountNumber.slice(-3)}`,
+            routing: `${data.routingNumber.slice(0, 2)}****${data.routingNumber.slice(-2)}`,
+            currency: data?.currency,
+            date: date,
+            status: "Complete",
+          };
         }
 
-        const withdrawInfo = {
-          $set: {
-            balance: newBalance,
-            withdraw:
-              parseFloat(userData.withdraw) + parseFloat(withdrawData.amount),
-          },
-        };
-        const balanceResult = await usersCollection.updateOne(
-          query,
-          withdrawInfo
-        );
+        const withdrawResult = await depositWithdrawCollection.insertOne(withdrawalData);
 
-        if (balanceResult.modifiedCount > 0) {
-          const result = await depositWithdrawCollection.insertOne(
-            withdrawData
+        if(withdrawResult.insertedId){
+          const userData = await usersCollection.findOne(query);
+          const withdrawalInfo = {
+            $set: {
+              balance:
+                parseFloat(userData?.balance) - parseFloat(data?.amount),
+              withdraw:
+                parseFloat(userData?.withdraw) + parseFloat(data?.amount),
+            },
+          };
+          const balanceResult = await usersCollection.updateOne(
+            query,
+            withdrawalInfo
           );
-          res.send(result);
-          return;
-        } else {
+          if (balanceResult.modifiedCount > 0) {
+         
+            return res.send(balanceResult);
+          } else {
+            // If balance is not updated, return an error response
+            return res.status(500).json({
+              error: "Failed to withdrawal. Refresh & try again",
+            });
+          }
+        }else {
           // If balance is not updated, return an error response
           return res.status(500).json({
-            error: "Failed to update balance",
+            error: "Failed to withdrawal. Refresh & try again",
           });
         }
+
       } catch (error) {
         // If an unexpected error occurs, return a general error response
-        // console.error("Error:", error);
-        res.status(500).json({
-          error: "Internal server error",
+        console.error("Error:", error);
+        return res.status(500).json({
+          error: "Failed to withdrawal. Refresh & try again",
         });
       }
     });
