@@ -756,7 +756,7 @@ async function run() {
 
     // Read articles API's
     app.get("/v1/api/articles", async (req, res) => {
-      const result = await articleCollection.find().toArray();
+      const result = await articleCollection.find().sort({ _id: -1 }).toArray();
       res.send(result);
     });
 
