@@ -383,46 +383,90 @@ async function run() {
     app.post("/v1/api/deposit/:email", async (req, res) => {
       try {
         const userEmail = req.params.email;
-        const depositData = req.body;
+        const data = req.body.data;
+        const date = req.body.date;
+        const isPaymentSelected = req.body.isPaymentSelected;
+
         const query = {
           email: userEmail,
         };
-        const userData = await usersCollection.findOne(query);
 
-        if (!userData) {
+        if (!data || !isPaymentSelected || !date) {
           // If user data is not found, return an error response
           return res.status(404).json({
-            error: "User not found",
+            error: "Data not found",
           });
         }
 
-        const depositInfo = {
-          $set: {
-            balance:
-              parseFloat(userData.balance) + parseFloat(depositData.amount),
-            deposit:
-              parseFloat(userData.deposit) + parseFloat(depositData.amount),
-          },
-        };
-        const balanceResult = await usersCollection.updateOne(
-          query,
-          depositInfo
-        );
+        let depositData = null;
 
-        if (balanceResult.modifiedCount > 0) {
-          const result = await depositWithdrawCollection.insertOne(depositData);
-          return res.send(result);
-        } else {
+        if (isPaymentSelected === "card") {
+          depositData = {
+            email: userEmail,
+            action: "Deposit",
+            amount: parseFloat(data?.amount),
+            method: "Card",
+            holder: data?.cardHolder,
+            card: `${data.cardNumber.slice(0, 4)}****${data.cardNumber.slice(-4)}`,
+            expired: data?.expiredDate,
+            currency: data?.currency,
+            date: date,
+            status: "Complete",
+          };
+        }
+        
+        if (isPaymentSelected === "bank") {
+          depositData = {
+            email: userEmail,
+            action: "Deposit",
+            amount: parseFloat(data?.amount),
+            method: "Bank",
+            holder: data?.accountHolder,
+            bank: `${data.accountNumber.slice(0, 3)}****${data.accountNumber.slice(-3)}`,
+            routing: `${data.routingNumber.slice(0, 2)}****${data.routingNumber.slice(-2)}`,
+            currency: data?.currency,
+            date: date,
+            status: "Complete",
+          };
+        }
+
+        const depositResult = await depositWithdrawCollection.insertOne(depositData);
+
+        if(depositResult.insertedId){
+          const userData = await usersCollection.findOne(query);
+          const depositInfo = {
+            $set: {
+              balance:
+                parseFloat(userData?.balance) + parseFloat(data?.amount),
+              deposit:
+                parseFloat(userData?.deposit) + parseFloat(data?.amount),
+            },
+          };
+          const balanceResult = await usersCollection.updateOne(
+            query,
+            depositInfo
+          );
+          if (balanceResult.modifiedCount > 0) {
+         
+            return res.send(balanceResult);
+          } else {
+            // If balance is not updated, return an error response
+            return res.status(500).json({
+              error: "Failed to deposit. Refresh & try again",
+            });
+          }
+        }else {
           // If balance is not updated, return an error response
           return res.status(500).json({
-            error: "Failed to update balance",
+            error: "Failed to deposit. Refresh & try again",
           });
         }
+
       } catch (error) {
         // If an unexpected error occurs, return a general error response
         console.error("Error:", error);
         return res.status(500).json({
-          error: "Internal server error",
+          error: "Failed to deposit. Refresh & try again",
         });
       }
     });
