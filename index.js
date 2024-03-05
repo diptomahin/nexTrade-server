@@ -294,20 +294,16 @@ async function run() {
         _id: new ObjectId(userId),
       };
       const result = await usersCollection.deleteOne(query);
-      const result2 = await purchasedCollection.deleteMany({
-        assetBuyerEmail: userEmail,
-      });
-      const result3 = await watchListCollection.deleteMany({
-        email: userEmail,
-      });
-      const result4 = await watchListCollection.deleteMany({
-        email: userEmail,
-      });
-      const result5 = await historyCollection.deleteMany({ Email: userEmail });
-      const result6 = await historyCollection.deleteMany({ email: userEmail });
-      const result7 = await investmentHistoryCollection.deleteMany({
-        assetBuyerEmail: userEmail,
-      });
+      const result2 = await purchasedCollection.deleteMany({ assetBuyerEmail: userEmail });
+      const result3 = await watchListCollection.deleteMany({ email: userEmail });
+      // const result4 = await historyCollection.deleteMany({ Email: userEmail });
+      const result5 = await investmentHistoryCollection.deleteMany({ assetBuyerEmail: userEmail });
+      const result6 = await contactCollection.deleteMany({ email: userEmail });
+      const result7 = await depositWithdrawCollection.deleteMany({ email: userEmail });
+      const result8 = await feedbackCollection.deleteMany({ reviewerEmail: userEmail });
+      const result9 = await invoicesCollection.deleteMany({ email: userEmail });
+      const result10 = await notificationsCollection.deleteMany({ email: userEmail });
+      const result11 = await spotTradingCollection.deleteMany({ assetBuyerEmail: userEmail });
       res.send(result);
     });
 
@@ -1101,11 +1097,10 @@ async function run() {
         const { totalInvestment, sellCoinProfit, sellCoinLoss } = sellingData;
         const sellCoinId = req.params.sellCoinId;
         const remainingBalance = req.params.remainingBalance;
-        const newBalance =
-          parseFloat(totalInvestment) +
-          parseFloat(sellCoinProfit) +
-          parseFloat(sellCoinLoss) +
-          parseFloat(remainingBalance);
+
+
+        const newBalance = parseFloat(totalInvestment) + parseFloat(sellCoinProfit) + parseFloat(sellCoinLoss) + parseFloat(remainingBalance);
+
         const query = { _id: new ObjectId(sellCoinId) };
         const filter = { email: useEmail };
         const result = await profitLossCollection.insertOne(sellingData);
