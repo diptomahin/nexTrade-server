@@ -1101,7 +1101,11 @@ async function run() {
         const { totalInvestment, sellCoinProfit, sellCoinLoss } = sellingData;
         const sellCoinId = req.params.sellCoinId;
         const remainingBalance = req.params.remainingBalance;
-        const newBalance = parseFloat(totalInvestment)+parseFloat(sellCoinProfit)+parseFloat(sellCoinLoss)+parseFloat(remainingBalance);
+        const newBalance =
+          parseFloat(totalInvestment) +
+          parseFloat(sellCoinProfit) +
+          parseFloat(sellCoinLoss) +
+          parseFloat(remainingBalance);
         const query = { _id: new ObjectId(sellCoinId) };
         const filter = { email: useEmail };
         const result = await profitLossCollection.insertOne(sellingData);
@@ -1112,26 +1116,31 @@ async function run() {
         res.send(result2);
       }
     );
-// get Profit and loss info for individual user
-app.get("/v1/api/profitLoss", async (req, res) => {
-  const email = req.query.email;
-  const query = {
-    email: email,
-  };
-  const result = await profitLossCollection
-    .find(query)
-    .sort({
-      _id: -1,
-    })
-    .toArray();
-  res.send(result);
-});
+    // get Profit and loss info for individual user
+    app.get("/v1/api/profitLoss", async (req, res) => {
+      const email = req.query.email;
+      const query = {
+        email: email,
+      };
+      const result = await profitLossCollection
+        .find(query)
+        .sort({
+          _id: -1,
+        })
+        .toArray();
+      res.send(result);
+    });
 
     app.get("/v1/api/totalAssetCount", async (req, res) => {
       const count = await purchasedCollection.estimatedDocumentCount();
       res.send({
         count,
       });
+    });
+
+    app.get("/v1/api/purchasedAssets", async (req, res) => {
+      const result = await purchasedCollection.find().toArray();
+      res.send(result);
     });
 
     app.get("/v1/api/purchasedAssets/:email", async (req, res) => {
