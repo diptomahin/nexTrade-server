@@ -57,7 +57,6 @@ async function run() {
     const profitLossCollection = nexTrade.collection("profitLoss");
 
     //  ========== Stripe APIs ========== //
-    //  ========== Stripe APIs ========== //
 
     // checkout api
     app.post("/v1/api/checkout-session", async (req, res) => {
@@ -175,8 +174,7 @@ async function run() {
         });
       }
     });
-
-    //  ========== user collection APIs ========== //
+    
     //  ========== user collection APIs ========== //
 
     // get all user
