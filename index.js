@@ -446,20 +446,19 @@ async function run() {
             query,
             depositInfo
           );
-
           if (balanceResult.modifiedCount > 0) {
          
             return res.send(balanceResult);
           } else {
             // If balance is not updated, return an error response
             return res.status(500).json({
-              error: "Failed to deposit. Try again",
+              error: "Failed to deposit. Refresh & try again",
             });
           }
         }else {
           // If balance is not updated, return an error response
           return res.status(500).json({
-            error: "Failed to deposit. Try again",
+            error: "Failed to deposit. Refresh & try again",
           });
         }
 
@@ -467,7 +466,7 @@ async function run() {
         // If an unexpected error occurs, return a general error response
         console.error("Error:", error);
         return res.status(500).json({
-          error: "Internal server error",
+          error: "Failed to deposit. Refresh & try again",
         });
       }
     });
