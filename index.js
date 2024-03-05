@@ -808,6 +808,7 @@ async function run() {
       res.send(result);
     });
 
+     // update viewCount API's
     app.patch("/v1/api/articles/viewCount/:id", async (req, res) => {
       const id = req.params.id;
       const query = {
@@ -822,6 +823,7 @@ async function run() {
       res.send(result);
     });
 
+    // comment update API's
     app.patch("/v1/api/articles/comments/:id", async (req, res) => {
       const id = req.params.id;
       const query = {
@@ -1324,7 +1326,7 @@ async function run() {
     });
 
     //  ========== Investment history collection APIs ========== //
-    
+
     app.post("/v1/api/investmentHistory", async (req, res) => {
       const history = req.body;
       const result = await investmentHistoryCollection.insertOne(history);
