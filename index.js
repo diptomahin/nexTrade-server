@@ -1191,7 +1191,7 @@ async function run() {
       }
     );
     // get Profit and loss info for individual user
-    app.get("/v1/api/profitLoss", async (req, res) => {
+    app.get("/v1/api/profitLoss/:email", async (req, res) => {
       const email = req.query.email;
       const query = {
         email: email,
