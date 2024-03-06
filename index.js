@@ -295,7 +295,7 @@ async function run() {
       const result = await usersCollection.deleteOne(query);
       const result2 = await purchasedCollection.deleteMany({ assetBuyerEmail: userEmail });
       const result3 = await watchListCollection.deleteMany({ email: userEmail });
-      // const result4 = await historyCollection.deleteMany({ Email: userEmail });
+      const result4 = await historyCollection.deleteMany({ Email: userEmail });
       const result5 = await investmentHistoryCollection.deleteMany({ assetBuyerEmail: userEmail });
       const result6 = await contactCollection.deleteMany({ email: userEmail });
       const result7 = await depositWithdrawCollection.deleteMany({ email: userEmail });
@@ -303,6 +303,7 @@ async function run() {
       const result9 = await invoicesCollection.deleteMany({ email: userEmail });
       const result10 = await notificationsCollection.deleteMany({ email: userEmail });
       const result11 = await spotTradingCollection.deleteMany({ assetBuyerEmail: userEmail });
+      const result12 = await profitLossCollection.deleteMany({ email: userEmail });
       res.send(result);
     });
 
