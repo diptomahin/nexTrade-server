@@ -55,6 +55,7 @@ async function run() {
     const investmentHistoryCollection =
       nexTrade.collection("investmentHistory");
     const profitLossCollection = nexTrade.collection("profitLoss");
+    const exchangeHistoryCollection = nexTrade.collection("exchangeHistory");
 
     //  ========== Stripe APIs ========== //
 
@@ -1371,6 +1372,27 @@ async function run() {
         assetBuyerEmail: email,
       };
       const result = await investmentHistoryCollection
+        .find(query)
+        .sort({ _id: -1 })
+        .toArray();
+      res.send(result);
+    });
+    
+      //  ========== Exchange history collection APIs ========== //
+    // const exchangeHistoryCollection = nexTrade.collection("exchangeHistory");
+
+    app.post("/v1/api/exchangeHistory", async (req, res) => {
+      const history = req.body;
+      const result = await exchangeHistoryCollection.insertOne(history);
+      res.send(result);
+    });
+
+    app.get("/v1/api/exchangeHistory", async (req, res) => {
+      const email = req.query.email;
+      const query = {
+        assetBuyerEmail: email,
+      };
+      const result = await exchangeHistoryCollection
         .find(query)
         .sort({ _id: -1 })
         .toArray();
