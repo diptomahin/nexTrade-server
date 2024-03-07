@@ -46,6 +46,7 @@ async function run() {
     const depositWithdrawCollection = nexTrade.collection("depositWithdraw");
     const invoicesCollection = nexTrade.collection("invoices");
     const articleCollection = nexTrade.collection("articles");
+    const commentCollection = nexTrade.collection("comments");
     const feedbackCollection = nexTrade.collection("feedbacks");
     const notificationsCollection = nexTrade.collection("notifications");
     const contactCollection = nexTrade.collection("contacts");
@@ -503,7 +504,7 @@ async function run() {
             status: "Complete",
           };
         }
-        
+
         if (isPaymentSelected === "bank") {
           withdrawalData = {
             email: userEmail,
@@ -521,7 +522,7 @@ async function run() {
 
         const withdrawResult = await depositWithdrawCollection.insertOne(withdrawalData);
 
-        if(withdrawResult.insertedId){
+        if (withdrawResult.insertedId) {
           const userData = await usersCollection.findOne(query);
           const withdrawalInfo = {
             $set: {
@@ -536,7 +537,7 @@ async function run() {
             withdrawalInfo
           );
           if (balanceResult.modifiedCount > 0) {
-         
+
             return res.send(balanceResult);
           } else {
             // If balance is not updated, return an error response
@@ -544,7 +545,7 @@ async function run() {
               error: "Failed to withdrawal. Refresh & try again",
             });
           }
-        }else {
+        } else {
           // If balance is not updated, return an error response
           return res.status(500).json({
             error: "Failed to withdrawal. Refresh & try again",
@@ -855,18 +856,18 @@ async function run() {
       res.send(result);
     });
 
-    // comment update API's
-    app.patch("/v1/api/articles/comments/:id", async (req, res) => {
-      const id = req.params.id;
-      const query = {
-        _id: new ObjectId(id),
-      };
-      const updateDoc = {
-        $set: { comment: req.body.commentTextValue }
-      }
-      const result = await articleCollection.updateOne(query, updateDoc);
+    // comment post API's
+    app.post("/v1/api/comments", async (req, res) => {
+      const comment = req.body;
+      const result = await commentCollection.insertOne(comment);
       res.send(result);
     })
+
+    // Read comment API's
+    app.get("/v1/api/comments", async (req, res) => {
+      const result = await commentCollection.find().sort({ _id: -1 }).toArray();
+      res.send(result);
+    });
 
     //  ========== notifications collection APIs ========== //
 
@@ -1370,7 +1371,7 @@ async function run() {
     // delete single history
     app.delete("/v1/api/investmentHistory/:id", async (req, res) => {
       const historyId = req.params.id;
-      const result = await investmentHistoryCollection.deleteOne({_id: new ObjectId(historyId)});
+      const result = await investmentHistoryCollection.deleteOne({ _id: new ObjectId(historyId) });
       res.send(result)
     })
 
@@ -1381,8 +1382,8 @@ async function run() {
       const result = await investmentHistoryCollection.deleteMany({ assetBuyerEmail: userEmail });
       res.send(result)
     })
-    
-      //  ========== Exchange history collection APIs ========== //
+
+    //  ========== Exchange history collection APIs ========== //
     // const exchangeHistoryCollection = nexTrade.collection("exchangeHistory");
 
     app.post("/v1/api/exchangeHistory", async (req, res) => {
