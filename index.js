@@ -1349,8 +1349,15 @@ async function run() {
     //  ========== Trading history collection APIs ========== //
 
     app.get("/v1/api/history", async (req, res) => {
-      const result = await historyCollection.find().toArray();
-      res.send(result);
+      const email = req.query.email;
+      const query = {
+        Email: email,
+      };
+      const result = await historyCollection
+        .find(query)
+        .sort({ _id: -1 })
+        .toArray();
+      res.send(result)
     });
 
     app.post("/v1/api/history", async (req, res) => {
@@ -1358,6 +1365,12 @@ async function run() {
       const result = await historyCollection.insertOne(history);
       res.send(result);
     });
+
+    app.delete("/v1/api/history/:id", async (req, res) => {
+      const historyId = req.params.id;
+      const result = await historyCollection.deleteOne({_id: new ObjectId(historyId)});
+      res.send(result)
+    })
 
     //  ========== Investment history collection APIs ========== //
 
@@ -1378,6 +1391,19 @@ async function run() {
         .toArray();
       res.send(result);
     });
+
+    app.delete("/v1/api/investmentHistory/:id", async (req, res) => {
+      const historyId = req.params.id;
+      const result = await investmentHistoryCollection.deleteOne({_id: new ObjectId(historyId)});
+      res.send(result)
+    })
+
+    app.delete("/v1/api/allHistory/:email", async (req, res) => {
+      const userEmail = req.params.email;
+      const result4 = await historyCollection.deleteMany({ Email: userEmail });
+      const result5 = await investmentHistoryCollection.deleteMany({ assetBuyerEmail: userEmail });
+      res.send(result4, result5)
+    })
     
       //  ========== Exchange history collection APIs ========== //
     // const exchangeHistoryCollection = nexTrade.collection("exchangeHistory");
