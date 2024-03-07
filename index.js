@@ -51,7 +51,6 @@ async function run() {
     const contactCollection = nexTrade.collection("contacts");
     const adminNotificationsCollection =
       nexTrade.collection("adminNotifications");
-    const historyCollection = nexTrade.collection("history");
     const investmentHistoryCollection =
       nexTrade.collection("investmentHistory");
     const profitLossCollection = nexTrade.collection("profitLoss");
@@ -295,7 +294,6 @@ async function run() {
       const result = await usersCollection.deleteOne(query);
       const result2 = await purchasedCollection.deleteMany({ assetBuyerEmail: userEmail });
       const result3 = await watchListCollection.deleteMany({ email: userEmail });
-      const result4 = await historyCollection.deleteMany({ Email: userEmail });
       const result5 = await investmentHistoryCollection.deleteMany({ assetBuyerEmail: userEmail });
       const result6 = await contactCollection.deleteMany({ email: userEmail });
       const result7 = await depositWithdrawCollection.deleteMany({ email: userEmail });
@@ -1346,32 +1344,8 @@ async function run() {
       res.send(result);
     });
 
+
     //  ========== Trading history collection APIs ========== //
-
-    app.get("/v1/api/history", async (req, res) => {
-      const email = req.query.email;
-      const query = {
-        Email: email,
-      };
-      const result = await historyCollection
-        .find(query)
-        .sort({ _id: -1 })
-        .toArray();
-      res.send(result)
-    });
-
-    app.post("/v1/api/history", async (req, res) => {
-      const history = req.body;
-      const result = await historyCollection.insertOne(history);
-      res.send(result);
-    });
-
-    app.delete("/v1/api/history/:id", async (req, res) => {
-      const historyId = req.params.id;
-      const result = await historyCollection.deleteOne({_id: new ObjectId(historyId)});
-      res.send(result)
-    })
-
     //  ========== Investment history collection APIs ========== //
 
     app.post("/v1/api/investmentHistory", async (req, res) => {
@@ -1380,6 +1354,7 @@ async function run() {
       res.send(result);
     });
 
+    // get all history
     app.get("/v1/api/investmentHistory", async (req, res) => {
       const email = req.query.email;
       const query = {
@@ -1392,17 +1367,19 @@ async function run() {
       res.send(result);
     });
 
+    // delete single history
     app.delete("/v1/api/investmentHistory/:id", async (req, res) => {
       const historyId = req.params.id;
       const result = await investmentHistoryCollection.deleteOne({_id: new ObjectId(historyId)});
       res.send(result)
     })
 
+    // delete all history
     app.delete("/v1/api/allHistory/:email", async (req, res) => {
       const userEmail = req.params.email;
-      const result4 = await historyCollection.deleteMany({ Email: userEmail });
-      const result5 = await investmentHistoryCollection.deleteMany({ assetBuyerEmail: userEmail });
-      res.send(result4, result5)
+
+      const result = await investmentHistoryCollection.deleteMany({ assetBuyerEmail: userEmail });
+      res.send(result)
     })
     
       //  ========== Exchange history collection APIs ========== //
