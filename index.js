@@ -1334,12 +1334,12 @@ async function run() {
           };
           const updatedDoc = {
             $set: {
-              balance: parseFloat(userBalance.balance),
+              balance: userBalance.balance,
             },
           };
           console.log(userBalance)
-          // const result = await usersCollection.updateOne(filter, updatedDoc);
-          // res.send(result);
+          const result = await usersCollection.updateOne(filter, updatedDoc);
+          res.send(result);
         });
 
         // 
