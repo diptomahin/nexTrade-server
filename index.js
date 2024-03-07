@@ -1326,19 +1326,20 @@ async function run() {
 
     //  ========== spotTrading collection APIs ========== //
         // update user balance
-        app.patch("/v1/api/all-users/:email/:balance", async (req, res) => {
+        app.patch("/v1/api/all-users/:email", async (req, res) => {
           const userEmail = req.params.email;
-          const userBalance = req.params.balance;
+          const userBalance = req.body;
           const filter = {
             email: userEmail,
           };
           const updatedDoc = {
             $set: {
-              balance: userBalance,
+              balance: parseFloat(userBalance.balance),
             },
           };
-          const result = await usersCollection.updateOne(filter, updatedDoc);
-          res.send(result);
+          console.log(userBalance)
+          // const result = await usersCollection.updateOne(filter, updatedDoc);
+          // res.send(result);
         });
     app.get("/v1/api/spotTrading", async (req, res) => {
       const result = await spotTradingCollection.find().toArray();
