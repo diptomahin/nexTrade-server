@@ -1340,6 +1340,8 @@ async function run() {
           const result = await usersCollection.updateOne(filter, updatedDoc);
           res.send(result);
         });
+
+        // 
     app.get("/v1/api/spotTrading", async (req, res) => {
       const result = await spotTradingCollection.find().toArray();
       res.send(result);
