@@ -949,6 +949,7 @@ async function run() {
     });
 
     // user update  all  notifications for a specific email
+    // user update  all  notifications for a specific email
     app.patch(
       "/v1/api/notifications/update-all-unread/:email",
       async (req, res) => {
