@@ -293,16 +293,32 @@ async function run() {
         _id: new ObjectId(userId),
       };
       const result = await usersCollection.deleteOne(query);
-      const result2 = await purchasedCollection.deleteMany({ assetBuyerEmail: userEmail });
-      const result3 = await watchListCollection.deleteMany({ email: userEmail });
-      const result5 = await investmentHistoryCollection.deleteMany({ assetBuyerEmail: userEmail });
+      const result2 = await purchasedCollection.deleteMany({
+        assetBuyerEmail: userEmail,
+      });
+      const result3 = await watchListCollection.deleteMany({
+        email: userEmail,
+      });
+      const result5 = await investmentHistoryCollection.deleteMany({
+        assetBuyerEmail: userEmail,
+      });
       const result6 = await contactCollection.deleteMany({ email: userEmail });
-      const result7 = await depositWithdrawCollection.deleteMany({ email: userEmail });
-      const result8 = await feedbackCollection.deleteMany({ reviewerEmail: userEmail });
+      const result7 = await depositWithdrawCollection.deleteMany({
+        email: userEmail,
+      });
+      const result8 = await feedbackCollection.deleteMany({
+        reviewerEmail: userEmail,
+      });
       const result9 = await invoicesCollection.deleteMany({ email: userEmail });
-      const result10 = await notificationsCollection.deleteMany({ email: userEmail });
-      const result11 = await spotTradingCollection.deleteMany({ assetBuyerEmail: userEmail });
-      const result12 = await profitLossCollection.deleteMany({ email: userEmail });
+      const result10 = await notificationsCollection.deleteMany({
+        email: userEmail,
+      });
+      const result11 = await spotTradingCollection.deleteMany({
+        assetBuyerEmail: userEmail,
+      });
+      const result12 = await profitLossCollection.deleteMany({
+        email: userEmail,
+      });
       res.send(result);
     });
 
@@ -405,7 +421,9 @@ async function run() {
             amount: parseFloat(data?.amount),
             method: "Card",
             holder: data?.cardHolder,
-            card: `${data.cardNumber.slice(0, 4)}****${data.cardNumber.slice(-4)}`,
+            card: `${data.cardNumber.slice(0, 4)}****${data.cardNumber.slice(
+              -4
+            )}`,
             expired: data?.expiredDate,
             currency: data?.currency,
             date: date,
@@ -420,24 +438,30 @@ async function run() {
             amount: parseFloat(data?.amount),
             method: "Bank",
             holder: data?.accountHolder,
-            bank: `${data.accountNumber.slice(0, 3)}****${data.accountNumber.slice(-3)}`,
-            routing: `${data.routingNumber.slice(0, 2)}****${data.routingNumber.slice(-2)}`,
+            bank: `${data.accountNumber.slice(
+              0,
+              3
+            )}****${data.accountNumber.slice(-3)}`,
+            routing: `${data.routingNumber.slice(
+              0,
+              2
+            )}****${data.routingNumber.slice(-2)}`,
             currency: data?.currency,
             date: date,
             status: "Complete",
           };
         }
 
-        const depositResult = await depositWithdrawCollection.insertOne(depositData);
+        const depositResult = await depositWithdrawCollection.insertOne(
+          depositData
+        );
 
         if (depositResult.insertedId) {
           const userData = await usersCollection.findOne(query);
           const depositInfo = {
             $set: {
-              balance:
-                parseFloat(userData?.balance) + parseFloat(data?.amount),
-              deposit:
-                parseFloat(userData?.deposit) + parseFloat(data?.amount),
+              balance: parseFloat(userData?.balance) + parseFloat(data?.amount),
+              deposit: parseFloat(userData?.deposit) + parseFloat(data?.amount),
             },
           };
           const balanceResult = await usersCollection.updateOne(
@@ -445,7 +469,6 @@ async function run() {
             depositInfo
           );
           if (balanceResult.modifiedCount > 0) {
-
             return res.send(balanceResult);
           } else {
             // If balance is not updated, return an error response
@@ -459,7 +482,6 @@ async function run() {
             error: "Failed to deposit. Refresh & try again",
           });
         }
-
       } catch (error) {
         // If an unexpected error occurs, return a general error response
         // console.error("Error:", error);
@@ -468,7 +490,6 @@ async function run() {
         });
       }
     });
-
 
     // post withdrawal data
     app.post("/v1/api/withdrawal/:email", async (req, res) => {
@@ -497,7 +518,9 @@ async function run() {
             amount: parseFloat(data?.amount),
             method: "Card",
             holder: data?.cardHolder,
-            card: `${data.cardNumber.slice(0, 4)}****${data.cardNumber.slice(-4)}`,
+            card: `${data.cardNumber.slice(0, 4)}****${data.cardNumber.slice(
+              -4
+            )}`,
             expired: data?.expiredDate,
             currency: data?.currency,
             date: date,
@@ -512,22 +535,29 @@ async function run() {
             amount: parseFloat(data?.amount),
             method: "Bank",
             holder: data?.accountHolder,
-            bank: `${data.accountNumber.slice(0, 3)}****${data.accountNumber.slice(-3)}`,
-            routing: `${data.routingNumber.slice(0, 2)}****${data.routingNumber.slice(-2)}`,
+            bank: `${data.accountNumber.slice(
+              0,
+              3
+            )}****${data.accountNumber.slice(-3)}`,
+            routing: `${data.routingNumber.slice(
+              0,
+              2
+            )}****${data.routingNumber.slice(-2)}`,
             currency: data?.currency,
             date: date,
             status: "Complete",
           };
         }
 
-        const withdrawResult = await depositWithdrawCollection.insertOne(withdrawalData);
+        const withdrawResult = await depositWithdrawCollection.insertOne(
+          withdrawalData
+        );
 
         if (withdrawResult.insertedId) {
           const userData = await usersCollection.findOne(query);
           const withdrawalInfo = {
             $set: {
-              balance:
-                parseFloat(userData?.balance) - parseFloat(data?.amount),
+              balance: parseFloat(userData?.balance) - parseFloat(data?.amount),
               withdraw:
                 parseFloat(userData?.withdraw) + parseFloat(data?.amount),
             },
@@ -537,7 +567,6 @@ async function run() {
             withdrawalInfo
           );
           if (balanceResult.modifiedCount > 0) {
-
             return res.send(balanceResult);
           } else {
             // If balance is not updated, return an error response
@@ -551,7 +580,6 @@ async function run() {
             error: "Failed to withdrawal. Refresh & try again",
           });
         }
-
       } catch (error) {
         // If an unexpected error occurs, return a general error response
         console.error("Error:", error);
@@ -861,7 +889,7 @@ async function run() {
       const comment = req.body;
       const result = await commentCollection.insertOne(comment);
       res.send(result);
-    })
+    });
 
     // Read comment API's
     app.get("/v1/api/comments", async (req, res) => {
@@ -1179,8 +1207,11 @@ async function run() {
         const sellCoinId = req.params.sellCoinId;
         const remainingBalance = req.params.remainingBalance;
 
-
-        const newBalance = parseFloat(totalInvestment) + parseFloat(sellCoinProfit) + parseFloat(sellCoinLoss) + parseFloat(remainingBalance);
+        const newBalance =
+          parseFloat(totalInvestment) +
+          parseFloat(sellCoinProfit) +
+          parseFloat(sellCoinLoss) +
+          parseFloat(remainingBalance);
 
         const query = { _id: new ObjectId(sellCoinId) };
         const filter = { email: useEmail };
@@ -1277,7 +1308,6 @@ async function run() {
           balance: remainingBalance,
         },
       };
-      const result1 = await usersCollection.updateOne(filter, updatedDoc);
       const result = await purchasedCollection.insertOne(asset);
       res.send(result);
     });
@@ -1325,24 +1355,24 @@ async function run() {
     );
 
     //  ========== spotTrading collection APIs ========== //
-        // update user balance
-        app.patch("/v1/api/all-users/:email", async (req, res) => {
-          const userEmail = req.params.email;
-          const userBalance = req.body;
-          const filter = {
-            email: userEmail,
-          };
-          const updatedDoc = {
-            $set: {
-              balance: userBalance.balance,
-            },
-          };
-          console.log(userBalance)
-          const result = await usersCollection.updateOne(filter, updatedDoc);
-          res.send(result);
-        });
+    // update user balance
+    app.patch("/v1/api/all-users/:email", async (req, res) => {
+      const userEmail = req.params.email;
+      const userBalance = req.body;
+      const filter = {
+        email: userEmail,
+      };
+      const updatedDoc = {
+        $set: {
+          balance: userBalance.balance,
+        },
+      };
+      console.log(userBalance);
+      const result = await usersCollection.updateOne(filter, updatedDoc);
+      res.send(result);
+    });
 
-        // 
+    //
     app.get("/v1/api/spotTrading", async (req, res) => {
       const result = await spotTradingCollection.find().toArray();
       res.send(result);
@@ -1362,7 +1392,6 @@ async function run() {
       const result = await spotTradingCollection.deleteOne(query);
       res.send(result);
     });
-
 
     //  ========== Trading history collection APIs ========== //
     //  ========== Investment history collection APIs ========== //
@@ -1389,17 +1418,21 @@ async function run() {
     // delete single history
     app.delete("/v1/api/investmentHistory/:id", async (req, res) => {
       const historyId = req.params.id;
-      const result = await investmentHistoryCollection.deleteOne({ _id: new ObjectId(historyId) });
-      res.send(result)
-    })
+      const result = await investmentHistoryCollection.deleteOne({
+        _id: new ObjectId(historyId),
+      });
+      res.send(result);
+    });
 
     // delete all history
     app.delete("/v1/api/allHistory/:email", async (req, res) => {
       const userEmail = req.params.email;
 
-      const result = await investmentHistoryCollection.deleteMany({ assetBuyerEmail: userEmail });
-      res.send(result)
-    })
+      const result = await investmentHistoryCollection.deleteMany({
+        assetBuyerEmail: userEmail,
+      });
+      res.send(result);
+    });
 
     //  ========== Exchange history collection APIs ========== //
     // const exchangeHistoryCollection = nexTrade.collection("exchangeHistory");
